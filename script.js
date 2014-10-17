@@ -27,11 +27,20 @@ function Game(canvas){
 				x: 0, 
 				y: self.height -80
 			},
-			height: 50,
+			height: 2,
 			width: self.width/3,
 			color: '#CEAA6A'
 		},self),
-		new Platform({
+		new Block({
+			position: { 
+				x: 0, 
+				y: self.height -80
+			},
+			height: 50,
+			width: self.width/3,
+			color: '#E5C38C'
+		},self),
+		new Block({
 			position: { 
 				x: self.width - 80, 
 				y: self.height - 80
@@ -160,6 +169,26 @@ function Platform(options,game){
 
 Platform.prototype = new Item();
 
+
+// todo: make Block the primitive that Platform is built on
+function Block(options,game){
+	var self = this;
+
+	self.position = options.position;
+	self.width = options.width;
+	self.height = options.height;
+	self.game = game;
+	this.color = options.color;
+
+	self.canSupportPlayer = false;
+
+	this.drawTransformations = function(ctx){
+		ctx.fillStyle = self.color;
+	}
+}
+
+Block.prototype = new Item();
+
 function Item(){
 	//todo: see if there is a way to get this to work
 	// var self = this;
@@ -270,7 +299,7 @@ function evaluateMomentumEffect(object,game,intersectingItems){
 
 	object.justJumped = false;
 
-	if(object.momentum.y !== 0 && object.momentum.y < game.maxFallSpeed){
+	if(object.momentum.y !== 0){
 		object.momentum.y += .1;
 	}
 
