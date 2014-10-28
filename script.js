@@ -9,6 +9,8 @@ function Game(canvas){
 	self.maxFallSpeed = 5;
 	self.tileSize = 5;
 
+	self.oneWaysEnabled = true;
+
 	self.ctx = canvas.getContext('2d');
 	self.objects = [new Player({
 			x:self.width/2,
@@ -32,6 +34,7 @@ function Game(canvas){
 			},
 			height: 50,
 			width: 250,
+			isOneWay: true,
 			color: '#CEAA6A'
 		},self),
 		// right-hand mesa
@@ -195,7 +198,7 @@ Player.prototype.updateX = function(){
 		leadingXCoord = self.getLeadingCorner()['x'],
 		closestObject = self.game.objects
 			.filter(function(object){
-				return object.isObstacle;
+				return object.isObstacle && !object.isOneWay;
 			})
 			.filter(function(object){
 				// player is not over or under object
@@ -233,7 +236,7 @@ Player.prototype.updateY = function(){
 		leadingCoord = self.getLeadingCorner(),
 		closestObject = self.game.objects
 			.filter(function(object){
-				return object.isObstacle;
+				return object.isObstacle && object.isOneWay ? self.game.oneWaysEnabled : true;
 			})
 			.filter(function(object){
 				// player is over object
@@ -244,6 +247,10 @@ Player.prototype.updateY = function(){
 				// player is higher than top of object
 				return self.position.y + self.height <= object.position.y;
 			})
+			// .filter(function(object){
+				// player was previously above object (not jumping through from bottom)
+			// 	return self.position.y - self.momentum.y < object.position.y;
+			// })
 			.sort(function(a,b){
 				//sort by closest to player
 				//need to handle them being equal
@@ -255,19 +262,38 @@ Player.prototype.updateY = function(){
 	
 
 	if(isOnGround){
-		self.isFalling = false;
+
+		// if falling at 75% of max fall speed or faster, bounce when hitting the ground
+		if(self.isFalling && self.momentum.y > self.game.maxFallSpeed * 0.75){
+			// flip momentum
+			self.momentum.y = -(Math.ceil( self.momentum.y * closestObject.springiness) );
+			// if we achieved bounce, get player off ground so they can actually bounce
+			if(self.momentum.y){
+				self.position.y -=.1;
+			}
+			
+		}
+
+		
 
 		//reset momentum while on ground (if player was already on ground previously)
 		if(self.lastPosition.y === self.position.y){
 			self.momentum.y = 0;
+			self.isFalling = false;
 		}
 
 	} else {
 		self.momentum.y += .2;
+		// comment out to fly :)
 		self.isFalling = true;
 	}
 
 
+	if(self.game.inputs.isDown('DOWN')){
+		self.game.oneWaysEnabled = false
+	} else {
+		self.game.oneWaysEnabled = true;
+	}
 
 	self.position.y = self.position.y + ( closestObject ? Math.min(self.momentum.y, closestObjectNearestEdge - leadingCoord.y ) : self.momentum.y);
 	self.lastPosition.y = self.position.y;
@@ -293,7 +319,9 @@ function Platform(options,game){
 	self.height = options.height;
 	self.game = game;
 	this.color = options.color;
+	self.springiness = 0.2;
 
+	self.isOneWay = !!options.isOneWay;
 	self.isObstacle = true;
 
 	self.canSupportPlayer = true;
