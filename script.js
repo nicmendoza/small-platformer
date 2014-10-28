@@ -6,7 +6,7 @@ function Game(canvas){
 	self.height = canvas.height;
 	self.width = canvas.width;
 	self.gravity = 10;
-	self.maxFallSpeed = 1;
+	self.maxFallSpeed = 5;
 	self.tileSize = 5;
 
 	self.ctx = canvas.getContext('2d');
@@ -50,9 +50,12 @@ function Game(canvas){
 }
 
 Game.prototype.draw = function(){
+	var self = this;
 	this.ctx.clearRect(0,0,this.width,this.height);
 	this.objects.forEach(function(object){
+		self.ctx.save();
 		object.draw();
+		self.ctx.restore();
 	});
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));
@@ -77,7 +80,7 @@ function Player(position,game){
 	self.currentMovementSpeed = self.maxMovementSpeed;
 	self.direction = 'left';
 
-	self.isFalling = true;
+	self.isFalling = false;
 	self.isCrouching = false;
 
 	self.position = position;
@@ -86,8 +89,6 @@ function Player(position,game){
 		x: 0,
 		y: 0.1
 	};
-	//todo: probably can remove this;
-	self.isJumping = false;
 }
 
 Player.prototype = new Item();
@@ -129,13 +130,16 @@ Player.prototype.draw = function(){
 		self.direction = 'right';
 	}
 
-	self.game.inputs.isDown('SPACE') && !self.isFalling && !self.isJumping && self.jump();
+	self.game.inputs.isDown('SPACE') && !self.isFalling && self.jump();
 
 	self.updateCrouching(self.game.inputs.isDown('DOWN'));
 
-	evaluateMomentumEffect(this,this.game,intersectingItems);
+	self.updateX();
+	self.updateY();
 
 	game.ctx.fillRect(self.position.x,self.position.y,self.width,self.height);
+	game.ctx.fillStyle = '#FF4444';
+	game.ctx.fillRect(self.position.x + ( self.direction === 'left' ? -2 : 0 ),self.position.y-2,self.width+2,2);
 };
 
 Player.prototype.updateCrouching = function(wantsToCrouch){
@@ -158,9 +162,7 @@ Player.prototype.updateCrouching = function(wantsToCrouch){
 
 Player.prototype.jump = function(){
 	var self = this;
-
-	self.isJumping = true;
-	self.justJumped = true;
+	this.position.y+=.1;
 	this.momentum.y = this.isCrouching ? -5 : -4;
 };
 
@@ -169,7 +171,7 @@ Player.prototype.getLeadingCorner = function(){
 	return {
 		// uses right edge as default, unless facing left
 		//todo: this seems backwards, and might be causing bugs. fix
-		x: self.direction === 'left' ? this.position.x + this.width : this.position.x,
+		x: self.direction === 'left' ? this.position.x : this.position.x + this.width,
 		// if falling, bottom, else top
 		y: this.momentum.y > 0 ? this.position.y + this.height : this.position.y
 	}
@@ -241,25 +243,14 @@ Player.prototype.updateY = function(){
 
 	self.lastPosition.y = self.position.y;
 
-	// if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')){
-	// 	self.position.x = self.position.x - ( closestObject ? Math.min(self.currentMovementSpeed,leadingXCoord - closestObjectNearestEdge) : self.currentMovementSpeed );
-	// }
-
-	// if(self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
-	// 	self.position.x = self.position.x +  ( closestObject ? Math.min(self.currentMovementSpeed, leadingXCoord + closestObject.position.x) : self.currentMovementSpeed );			
-	// }
-
 	if(isOnGround){
 		self.isFalling = false;
-		self.isJumping = false;
-		//self.momentum.y = 0;
+		self.momentum.y = 0;
+	} else {
+		self.momentum.y += .2;
+		self.isFalling = true;
+		
 	}
-
-	// if(self.isFalling){
-	// 	//self.momentum.y += 0.1;
-	// }
-
-	
 
 	self.position.y = self.position.y + ( closestObject ? Math.min(self.momentum.y, closestObjectNearestEdge - leadingCoord.y ) : self.momentum.y);
 
@@ -349,10 +340,8 @@ Item.prototype.itemsBelow = function(){
 };
 
 Item.prototype.draw = function(){
-	this.game.ctx.save();
 	this.drawTransformations && this.drawTransformations(this.game.ctx);
 	this.game.ctx.fillRect(this.position.x,this.position.y,this.width,this.height);
-	this.game.ctx.restore();
 };
 
 function KeyboardListener(){
@@ -377,53 +366,6 @@ function KeyboardListener(){
 	document.addEventListener('keyup',function(e){
 		down[e.keyCode] = false;
 	});
-}
-
-
-function evaluateMomentumEffect(object,game,intersectingItems){
-
-	var objectBottomY = object.position.y + object.height,
-		supportingItems = intersectingItems 
-		&& intersectingItems.filter(function(item){
-				return item.canSupportPlayer
-						// this still doesn't work for fast-falling objects
-						&& objectBottomY - item.position.y < 5;
-			}),
-		isFalling = object.momentum.y > 0;
-
-	// for walking over cliffs
-	if(!intersectingItems.length){
-		// start falling if in mid-air and not moving
-		object.momentum.y += .1;
-	}
-
-	// if(isFalling && supportingItems.length){
-
-	// 	object.isFalling = false;
-	// 	object.isJumping = false;
-
-	// 	// prevent item from going through intersecting item that can support it
-	// 	object.position.y = supportingItems[0].position.y - object.height;
-
-	// 	// add a bounce for large drops
-	// 	if(object.momentum.y > 0 ){
-	// 		object.momentum.y = Math.ceil(-object.momentum.y*.3);
-	// 	}
-
-	// }
-
-	object.justJumped = false;
-
-	if(object.momentum.y !== 0 && object.momentum.y < game.maxFallSpeed){
-		object.momentum.y += .1;
-	}
-
-	object.updateX();
-	object.updateY();
-
-	//object.position.y += object.momentum.y;
-	//object.position.x += object.momentum.x;
-
 }
 
 var game = new Game(document.getElementById('game'));
