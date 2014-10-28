@@ -14,24 +14,37 @@ function Game(canvas){
 			x:self.width/2,
 			y:self.height - 70
 		},self),  
+		// ground
 		new Platform({
 			position: { 
 				x: 0, 
 				y: self.height - 30
 			},
 			height: 50,
-			width: self.width * 0.6,
+			width: 600,
 			color: '#F5D190'
 		},self),
+		// left-hand mesa
 		new Platform({
 			position: { 
 				x: 0, 
 				y: self.height -80
 			},
 			height: 50,
-			width: self.width/3,
+			width: 250,
 			color: '#CEAA6A'
 		},self),
+		// right-hand mesa
+		new Platform({
+			position: { 
+				x: 500, 
+				y: self.height -80
+			},
+			height: 50,
+			width: 50,
+			color: '#CEAA6A'
+		},self),
+		// green island
 		new Platform({
 			position: { 
 				x: self.width - 80, 
@@ -119,8 +132,6 @@ Player.prototype.draw = function(){
 
 	*/
 
-	self.getLeadingCorner();
-
 	//set facing direction
 	if(self.game.inputs.isDown('LEFT')){
 		self.direction = 'left';
@@ -171,7 +182,7 @@ Player.prototype.getLeadingCorner = function(){
 	return {
 		// uses right edge as default, unless facing left
 		//todo: this seems backwards, and might be causing bugs. fix
-		x: self.direction === 'left' ? this.position.x : this.position.x + this.width,
+		x: this.direction === 'left' ? this.position.x: this.position.x + this.width,
 		// if falling, bottom, else top
 		y: this.momentum.y > 0 ? this.position.y + this.height : this.position.y
 	}
@@ -181,7 +192,7 @@ Player.prototype.getLeadingCorner = function(){
 
 Player.prototype.updateX = function(){
 	var self = this,
-		leadingXCoord = self.getLeadingCorner().x,
+		leadingXCoord = self.getLeadingCorner()['x'],
 		closestObject = self.game.objects
 			.filter(function(object){
 				return object.isObstacle;
@@ -212,7 +223,7 @@ Player.prototype.updateX = function(){
 	}
 
 	if(self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
-		self.position.x = self.position.x +  ( closestObject ? Math.min(self.currentMovementSpeed, leadingXCoord + closestObject.position.x) : self.currentMovementSpeed );			
+		self.position.x = self.position.x +  ( closestObject ? Math.min(self.currentMovementSpeed, closestObject.position.x - leadingXCoord ) : self.currentMovementSpeed );			
 	}
 
 };
@@ -226,8 +237,8 @@ Player.prototype.updateY = function(){
 			})
 			.filter(function(object){
 				// player is over object
-				return self.position.x > object.position.x
-					&& self.position.x + self.width <= object.position.x + object.width;
+				return self.position.x + self.width > object.position.x
+					&& self.position.x < object.position.x + object.width;
 			})
 			.filter(function(object){
 				// player is higher than top of object
@@ -241,19 +252,25 @@ Player.prototype.updateY = function(){
 		closestObjectNearestEdge = closestObject && closestObject.position.y,
 		isOnGround = Math.abs(self.position.y + self.height - closestObjectNearestEdge) < 1;
 
-	self.lastPosition.y = self.position.y;
+	
 
 	if(isOnGround){
 		self.isFalling = false;
-		self.momentum.y = 0;
+
+		//reset momentum while on ground (if player was already on ground previously)
+		if(self.lastPosition.y === self.position.y){
+			self.momentum.y = 0;
+		}
+
 	} else {
 		self.momentum.y += .2;
 		self.isFalling = true;
-		
 	}
 
-	self.position.y = self.position.y + ( closestObject ? Math.min(self.momentum.y, closestObjectNearestEdge - leadingCoord.y ) : self.momentum.y);
 
+
+	self.position.y = self.position.y + ( closestObject ? Math.min(self.momentum.y, closestObjectNearestEdge - leadingCoord.y ) : self.momentum.y);
+	self.lastPosition.y = self.position.y;
 }
 
 /*
