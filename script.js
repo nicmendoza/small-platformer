@@ -6,51 +6,93 @@ function Game(canvas){
 	self.height = canvas.height;
 	self.width = canvas.width;
 	self.gravity = 10;
-	self.maxFallSpeed = 1;
+	self.maxFallSpeed = 5;
 	self.tileSize = 5;
 
+	self.oneWaysEnabled = true;
+
 	self.ctx = canvas.getContext('2d');
-	self.objects = [new Player({
-			x:self.width/2,
-			y:self.height - 70
-		},self),  
-		new Platform({
-			position: { 
-				x: 0, 
-				y: self.height - 30
-			},
-			height: 50,
-			width: self.width * 0.6,
-			color: '#F5D190'
-		},self),
-		new Platform({
-			position: { 
-				x: 0, 
-				y: self.height -80
-			},
-			height: 2,
-			width: self.width/3,
-			color: '#CEAA6A'
-		},self),
-		new Block({
-			position: { 
-				x: 0, 
-				y: self.height -80
-			},
-			height: 50,
-			width: self.width/3,
-			color: '#E5C38C'
-		},self),
-		new Block({
-			position: { 
-				x: self.width - 80, 
-				y: self.height - 80
-			},
-			height: 80,
-			width: 40,
-			color: '#7CAD8A'
-		},self)
-		].reverse();
+
+	self.stages = [new Stage(3000,1,[],function(player){
+
+		var playerPositionX = player.stage.getPosition(player).x,
+			activeZoneWidth = 200;
+
+		// OPTION: player-centered camera
+		//this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
+
+		// OPTION: player-following camera
+		if(playerPositionX < activeZoneWidth){
+			
+			this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
+		} else if(playerPositionX > self.width - activeZoneWidth ) {
+			this.position.x += (self.width-activeZoneWidth - playerPositionX);
+		};
+
+		
+	})];
+
+	self.mainStage = self.stages[0];
+
+	self.player = new Player({
+		x:self.width/2,
+		y:self.height - 70
+	},self);
+
+	[  self.player,
+	// ground
+	new Platform({
+		position: { 
+			x: 0, 
+			y: self.height - 30
+		},
+		height: 50,
+		width: 1200,
+		color: '#F5D190'
+	},self),
+	// left-hand mesa
+	new Platform({
+		position: { 
+			x: 0, 
+			y: self.height -80
+		},
+		height: 50,
+		width: 250,
+		isOneWay: true,
+		color: '#CEAA6A'
+	},self),
+	// right-hand mesa
+	new Platform({
+		position: { 
+			x: 500, 
+			y: self.height -80
+		},
+		height: 50,
+		width: 50,
+		color: '#CEAA6A'
+	},self),
+	// green island
+	new Platform({
+		position: { 
+			x: self.width - 80, 
+			y: self.height - 80
+		},
+		height: 80,
+		width: 40,
+		color: '#7CAD8A'
+	},self)
+	].reverse().forEach(function(object){
+		self.stages[0].addObject(object);
+	});
+
+	/*	
+		array of stages
+
+		when player moves (near edge of screen),
+		stage position is updated by the amount of the player's movement,
+		proportionally to its perceived distance
+
+	*/
 
 	self.inputs = new KeyboardListener();
 
@@ -59,15 +101,27 @@ function Game(canvas){
 }
 
 Game.prototype.draw = function(){
+	var self = this;
 	this.ctx.clearRect(0,0,this.width,this.height);
-	this.objects.forEach(function(object){
-		object.draw();
+	self.stages.forEach(function(stage){
+		stage.objects.forEach(function(object){
+			self.ctx.save();
+			object.draw();
+			self.ctx.restore();
+		});
+
+		stage.update(self.player);
 	});
+	
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));
 	}
 	
 };
+
+Game.prototype.pushStages = function(leadingCorner){
+	//if(leadingCorner.x > )
+}
 
 Game.prototype.objectOutOfFrame = function(){
 	//todo: finish this
@@ -86,7 +140,9 @@ function Player(position,game){
 	self.currentMovementSpeed = self.maxMovementSpeed;
 	self.direction = 'left';
 
-	self.isFalling = true;
+	self.stage = game.mainStage;
+
+	self.isFalling = false;
 	self.isCrouching = false;
 
 	self.position = position;
@@ -95,18 +151,17 @@ function Player(position,game){
 		x: 0,
 		y: 0.1
 	};
-	//todo: probably can remove this;
-	self.isJumping = false;
 }
 
 Player.prototype = new Item();
 
 Player.prototype.draw = function(){
 	var self = this,
-		intersectingItems = self.getIntersectingItems();
+		intersectingItems = self.getIntersectingItems(),
+		position = self.stage.getPosition(self);
 
-	self.lastPosition.x = self.position.x;
-	self.lastPosition.y = self.position.y;
+	self.lastPosition.x = position.x;
+	self.lastPosition.y = position.y;
 
 	/*
 
@@ -127,8 +182,6 @@ Player.prototype.draw = function(){
 
 	*/
 
-	self.getLeadingCorner();
-
 	//set facing direction
 	if(self.game.inputs.isDown('LEFT')){
 		self.direction = 'left';
@@ -138,13 +191,16 @@ Player.prototype.draw = function(){
 		self.direction = 'right';
 	}
 
-	self.game.inputs.isDown('SPACE') && !self.isFalling && !self.isJumping && self.jump();
+	self.game.inputs.isDown('SPACE') && !self.isFalling && self.jump();
 
 	self.updateCrouching(self.game.inputs.isDown('DOWN'));
 
-	evaluateMomentumEffect(this,this.game,intersectingItems);
+	self.updateX();
+	self.updateY();
 
-	game.ctx.fillRect(self.position.x,self.position.y,self.width,self.height);
+	game.ctx.fillRect(position.x,position.y,self.width,self.height);
+	game.ctx.fillStyle = '#FF4444';
+	game.ctx.fillRect(position.x + ( self.direction === 'left' ? -2 : 0 ),position.y-2,self.width+2,2);
 };
 
 Player.prototype.updateCrouching = function(wantsToCrouch){
@@ -167,9 +223,7 @@ Player.prototype.updateCrouching = function(wantsToCrouch){
 
 Player.prototype.jump = function(){
 	var self = this;
-
-	self.isJumping = true;
-	self.justJumped = true;
+	this.position.y+=.1;
 	this.momentum.y = this.isCrouching ? -5 : -4;
 };
 
@@ -178,7 +232,7 @@ Player.prototype.getLeadingCorner = function(){
 	return {
 		// uses right edge as default, unless facing left
 		//todo: this seems backwards, and might be causing bugs. fix
-		x: self.direction === 'left' ? this.position.x + this.width : this.position.x,
+		x: this.direction === 'left' ? this.position.x: this.position.x + this.width,
 		// if falling, bottom, else top
 		y: this.momentum.y > 0 ? this.position.y + this.height : this.position.y
 	}
@@ -188,10 +242,10 @@ Player.prototype.getLeadingCorner = function(){
 
 Player.prototype.updateX = function(){
 	var self = this,
-		leadingXCoord = self.getLeadingCorner().x,
-		closestObject = self.game.objects
+		leadingXCoord = self.getLeadingCorner()['x'],
+		closestObject = self.stage.objects
 			.filter(function(object){
-				return object.isObstacle;
+				return object.isObstacle && !object.isOneWay;
 			})
 			.filter(function(object){
 				// player is not over or under object
@@ -212,6 +266,7 @@ Player.prototype.updateX = function(){
 			})[0],
 		closestObjectNearestEdge = closestObject && ( self.direction === 'left' ? closestObject.position.x + closestObject.width : closestObject.position.x );
 
+
 	self.lastPosition.x = self.position.x;
 
 	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')){
@@ -219,7 +274,7 @@ Player.prototype.updateX = function(){
 	}
 
 	if(self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
-		self.position.x = self.position.x +  ( closestObject ? Math.min(self.currentMovementSpeed, leadingXCoord + closestObject.position.x) : self.currentMovementSpeed );			
+		self.position.x = self.position.x +  ( closestObject ? Math.min(self.currentMovementSpeed, closestObject.position.x - leadingXCoord ) : self.currentMovementSpeed );			
 	}
 
 };
@@ -227,19 +282,23 @@ Player.prototype.updateX = function(){
 Player.prototype.updateY = function(){
 	var self = this,
 		leadingCoord = self.getLeadingCorner(),
-		closestObject = self.game.objects
+		closestObject = self.stage.objects
 			.filter(function(object){
-				return object.isObstacle;
+				return object.isObstacle && object.isOneWay ? self.game.oneWaysEnabled : true;
 			})
 			.filter(function(object){
 				// player is over object
-				return self.position.x > object.position.x
-					&& self.position.x + self.width <= object.position.x + object.width;
+				return self.position.x + self.width > object.position.x
+					&& self.position.x < object.position.x + object.width;
 			})
 			.filter(function(object){
 				// player is higher than top of object
 				return self.position.y + self.height <= object.position.y;
 			})
+			// .filter(function(object){
+				// player was previously above object (not jumping through from bottom)
+			// 	return self.position.y - self.momentum.y < object.position.y;
+			// })
 			.sort(function(a,b){
 				//sort by closest to player
 				//need to handle them being equal
@@ -248,30 +307,44 @@ Player.prototype.updateY = function(){
 		closestObjectNearestEdge = closestObject && closestObject.position.y,
 		isOnGround = Math.abs(self.position.y + self.height - closestObjectNearestEdge) < 1;
 
-	self.lastPosition.y = self.position.y;
-
-	// if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')){
-	// 	self.position.x = self.position.x - ( closestObject ? Math.min(self.currentMovementSpeed,leadingXCoord - closestObjectNearestEdge) : self.currentMovementSpeed );
-	// }
-
-	// if(self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
-	// 	self.position.x = self.position.x +  ( closestObject ? Math.min(self.currentMovementSpeed, leadingXCoord + closestObject.position.x) : self.currentMovementSpeed );			
-	// }
-
-	if(isOnGround){
-		self.isFalling = false;
-		self.isJumping = false;
-		//self.momentum.y = 0;
-	}
-
-	// if(self.isFalling){
-	// 	//self.momentum.y += 0.1;
-	// }
-
 	
 
-	self.position.y = self.position.y + ( closestObject ? Math.min(self.momentum.y, closestObjectNearestEdge - leadingCoord.y ) : self.momentum.y);
+	if(isOnGround){
 
+		// if falling at 75% of max fall speed or faster, bounce when hitting the ground
+		if(self.isFalling && self.momentum.y > self.game.maxFallSpeed * 0.75){
+			// flip momentum
+			self.momentum.y = -(Math.ceil( self.momentum.y * closestObject.springiness) );
+			// if we achieved bounce, get player off ground so they can actually bounce
+			if(self.momentum.y){
+				self.position.y -=.1;
+			}
+			
+		}
+
+		
+
+		//reset momentum while on ground (if player was already on ground previously)
+		if(self.lastPosition.y === self.position.y){
+			self.momentum.y = 0;
+			self.isFalling = false;
+		}
+
+	} else {
+		self.momentum.y += .2;
+		// comment out to fly :)
+		self.isFalling = true;
+	}
+
+
+	if(self.game.inputs.isDown('DOWN')){
+		self.game.oneWaysEnabled = false
+	} else {
+		self.game.oneWaysEnabled = true;
+	}
+
+	self.position.y = self.position.y + ( closestObject ? Math.min(self.momentum.y, closestObjectNearestEdge - leadingCoord.y ) : self.momentum.y);
+	self.lastPosition.y = self.position.y;
 }
 
 /*
@@ -294,7 +367,12 @@ function Platform(options,game){
 	self.height = options.height;
 	self.game = game;
 	this.color = options.color;
+	self.springiness = 0.2;
 
+	// todo: pass this in
+	this.stage = game.mainStage;
+
+	self.isOneWay = !!options.isOneWay;
 	self.isObstacle = true;
 
 	self.canSupportPlayer = true;
@@ -306,25 +384,39 @@ function Platform(options,game){
 
 Platform.prototype = new Item();
 
+/*
+	stage
+		position
+			x
+			y
+		relativeMovementRatio
+*/
 
-// todo: make Block the primitive that Platform is built on
-function Block(options,game){
+function Stage(width, relativeMovementRatio,initialObjects,update){
 	var self = this;
 
-	self.position = options.position;
-	self.width = options.width;
-	self.height = options.height;
-	self.game = game;
-	this.color = options.color;
+	self.objects = initialObjects || [];
 
-	self.canSupportPlayer = false;
+	self.update = update.bind(self);
 
-	this.drawTransformations = function(ctx){
-		ctx.fillStyle = self.color;
+	self.position = {
+		x: 0,
+		y: 0
 	}
+
+	self.relativeMovementRatio = relativeMovementRatio;
 }
 
-Block.prototype = new Item();
+Stage.prototype.addObject = function(object){
+	this.objects.push(object);
+};
+
+Stage.prototype.getPosition = function(object){
+	return {
+		x: object.position.x + this.position.x,
+		y: object.position.y + this.position.y
+	}
+}
 
 function Item(){
 	//todo: see if there is a way to get this to work
@@ -354,7 +446,7 @@ Item.prototype.getIntersectingItems = function(){
 		thisTop = this.position.y,
 		thisBottom = thisTop + this.height;
 
-	return this.game.objects.filter(function(item){
+	return this.stage.objects.filter(function(item){
 		var itemLeft = item.position.x,
 			itemRight = itemLeft + item.width,
 			itemTop = item.position.y,
@@ -372,16 +464,17 @@ Item.prototype.getIntersectingItems = function(){
 
 Item.prototype.itemsBelow = function(){
 	var self = this;
-	return self.game && self.game.objects.filter(function(object){
+	return self.game && self.stage.objects.filter(function(object){
 
 	}) || [];
 };
 
 Item.prototype.draw = function(){
-	this.game.ctx.save();
+
+	var position = this.stage.getPosition(this);
+
 	this.drawTransformations && this.drawTransformations(this.game.ctx);
-	this.game.ctx.fillRect(this.position.x,this.position.y,this.width,this.height);
-	this.game.ctx.restore();
+	this.game.ctx.fillRect(position.x,position.y,this.width,this.height);
 };
 
 function KeyboardListener(){
@@ -406,53 +499,6 @@ function KeyboardListener(){
 	document.addEventListener('keyup',function(e){
 		down[e.keyCode] = false;
 	});
-}
-
-
-function evaluateMomentumEffect(object,game,intersectingItems){
-
-	var objectBottomY = object.position.y + object.height,
-		supportingItems = intersectingItems 
-		&& intersectingItems.filter(function(item){
-				return item.canSupportPlayer
-						// this still doesn't work for fast-falling objects
-						&& objectBottomY - item.position.y < 5;
-			}),
-		isFalling = object.momentum.y > 0;
-
-	// for walking over cliffs
-	if(!intersectingItems.length){
-		// start falling if in mid-air and not moving
-		object.momentum.y += .1;
-	}
-
-	// if(isFalling && supportingItems.length){
-
-	// 	object.isFalling = false;
-	// 	object.isJumping = false;
-
-	// 	// prevent item from going through intersecting item that can support it
-	// 	object.position.y = supportingItems[0].position.y - object.height;
-
-	// 	// add a bounce for large drops
-	// 	if(object.momentum.y > 0 ){
-	// 		object.momentum.y = Math.ceil(-object.momentum.y*.3);
-	// 	}
-
-	// }
-
-	object.justJumped = false;
-
-	if(object.momentum.y !== 0){
-		object.momentum.y += .1;
-	}
-
-	object.updateX();
-	object.updateY();
-
-	//object.position.y += object.momentum.y;
-	//object.position.x += object.momentum.x;
-
 }
 
 var game = new Game(document.getElementById('game'));
