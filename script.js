@@ -264,17 +264,18 @@ Player.prototype.updateX = function(){
 				//need to handle them being equal
 				return Math.abs(self.position.x - a.position.x) > Math.abs(self.position.x - b.position.x) ? 1 : 0;
 			})[0],
-		closestObjectNearestEdge = closestObject && ( self.direction === 'left' ? closestObject.position.x + closestObject.width : closestObject.position.x );
+		closestObjectNearestEdge = closestObject && ( self.direction === 'left' ? closestObject.position.x + closestObject.width : closestObject.position.x ),
+		movementSpeed = self.isCrouching ? self.currentMovementSpeed/5 : self.currentMovementSpeed;
 
 
 	self.lastPosition.x = self.position.x;
 
 	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')){
-		self.position.x = self.position.x - ( closestObject ? Math.min(self.currentMovementSpeed,leadingXCoord - closestObjectNearestEdge) : self.currentMovementSpeed );
+		self.position.x = self.position.x - ( closestObject ? Math.min(movementSpeed,leadingXCoord - closestObjectNearestEdge) : movementSpeed );
 	}
 
 	if(self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
-		self.position.x = self.position.x +  ( closestObject ? Math.min(self.currentMovementSpeed, closestObject.position.x - leadingXCoord ) : self.currentMovementSpeed );			
+		self.position.x = self.position.x +  ( closestObject ? Math.min(movementSpeed, closestObject.position.x - leadingXCoord ) : movementSpeed );			
 	}
 
 };
