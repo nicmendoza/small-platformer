@@ -12,52 +12,87 @@ function Game(canvas){
 	self.oneWaysEnabled = true;
 
 	self.ctx = canvas.getContext('2d');
-	self.objects = [new Player({
-			x:self.width/2,
-			y:self.height - 70
-		},self),  
-		// ground
-		new Platform({
-			position: { 
-				x: 0, 
-				y: self.height - 30
-			},
-			height: 50,
-			width: 600,
-			color: '#F5D190'
-		},self),
-		// left-hand mesa
-		new Platform({
-			position: { 
-				x: 0, 
-				y: self.height -80
-			},
-			height: 50,
-			width: 250,
-			isOneWay: true,
-			color: '#CEAA6A'
-		},self),
-		// right-hand mesa
-		new Platform({
-			position: { 
-				x: 500, 
-				y: self.height -80
-			},
-			height: 50,
-			width: 50,
-			color: '#CEAA6A'
-		},self),
-		// green island
-		new Platform({
-			position: { 
-				x: self.width - 80, 
-				y: self.height - 80
-			},
-			height: 80,
-			width: 40,
-			color: '#7CAD8A'
-		},self)
-		].reverse();
+
+	self.stages = [new Stage(3000,1,[],function(player){
+
+		var playerPositionX = player.stage.getPosition(player).x,
+			activeZoneWidth = 300;
+
+		// OPTION: player-centered camera
+		//this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
+
+		// OPTION: player-following camera
+		if(playerPositionX < activeZoneWidth){
+			
+			this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
+		} else if(playerPositionX > self.width - activeZoneWidth ) {
+			this.position.x += (self.width-activeZoneWidth - playerPositionX);
+		};
+
+		
+	})];
+
+	self.mainStage = self.stages[0];
+
+	self.player = new Player({
+		x:self.width/2,
+		y:self.height - 70
+	},self);
+
+	[  self.player,
+	// ground
+	new Platform({
+		position: { 
+			x: 0, 
+			y: self.height - 30
+		},
+		height: 50,
+		width: 1200,
+		color: '#F5D190'
+	},self),
+	// left-hand mesa
+	new Platform({
+		position: { 
+			x: 0, 
+			y: self.height -80
+		},
+		height: 50,
+		width: 250,
+		isOneWay: true,
+		color: '#CEAA6A'
+	},self),
+	// right-hand mesa
+	new Platform({
+		position: { 
+			x: 500, 
+			y: self.height -80
+		},
+		height: 50,
+		width: 50,
+		color: '#CEAA6A'
+	},self),
+	// green island
+	new Platform({
+		position: { 
+			x: self.width - 80, 
+			y: self.height - 80
+		},
+		height: 80,
+		width: 40,
+		color: '#7CAD8A'
+	},self)
+	].reverse().forEach(function(object){
+		self.stages[0].addObject(object);
+	});
+
+	/*	
+		array of stages
+
+		when player moves (near edge of screen),
+		stage position is updated by the amount of the player's movement,
+		proportionally to its perceived distance
+
+	*/
 
 	self.inputs = new KeyboardListener();
 
@@ -68,16 +103,25 @@ function Game(canvas){
 Game.prototype.draw = function(){
 	var self = this;
 	this.ctx.clearRect(0,0,this.width,this.height);
-	this.objects.forEach(function(object){
-		self.ctx.save();
-		object.draw();
-		self.ctx.restore();
+	self.stages.forEach(function(stage){
+		stage.objects.forEach(function(object){
+			self.ctx.save();
+			object.draw();
+			self.ctx.restore();
+		});
+
+		stage.update(self.player);
 	});
+	
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));
 	}
 	
 };
+
+Game.prototype.pushStages = function(leadingCorner){
+	//if(leadingCorner.x > )
+}
 
 Game.prototype.objectOutOfFrame = function(){
 	//todo: finish this
@@ -96,6 +140,8 @@ function Player(position,game){
 	self.currentMovementSpeed = self.maxMovementSpeed;
 	self.direction = 'left';
 
+	self.stage = game.mainStage;
+
 	self.isFalling = false;
 	self.isCrouching = false;
 
@@ -111,10 +157,11 @@ Player.prototype = new Item();
 
 Player.prototype.draw = function(){
 	var self = this,
-		intersectingItems = self.getIntersectingItems();
+		intersectingItems = self.getIntersectingItems(),
+		position = self.stage.getPosition(self);
 
-	self.lastPosition.x = self.position.x;
-	self.lastPosition.y = self.position.y;
+	self.lastPosition.x = position.x;
+	self.lastPosition.y = position.y;
 
 	/*
 
@@ -151,9 +198,9 @@ Player.prototype.draw = function(){
 	self.updateX();
 	self.updateY();
 
-	game.ctx.fillRect(self.position.x,self.position.y,self.width,self.height);
+	game.ctx.fillRect(position.x,position.y,self.width,self.height);
 	game.ctx.fillStyle = '#FF4444';
-	game.ctx.fillRect(self.position.x + ( self.direction === 'left' ? -2 : 0 ),self.position.y-2,self.width+2,2);
+	game.ctx.fillRect(position.x + ( self.direction === 'left' ? -2 : 0 ),position.y-2,self.width+2,2);
 };
 
 Player.prototype.updateCrouching = function(wantsToCrouch){
@@ -196,7 +243,7 @@ Player.prototype.getLeadingCorner = function(){
 Player.prototype.updateX = function(){
 	var self = this,
 		leadingXCoord = self.getLeadingCorner()['x'],
-		closestObject = self.game.objects
+		closestObject = self.stage.objects
 			.filter(function(object){
 				return object.isObstacle && !object.isOneWay;
 			})
@@ -219,6 +266,7 @@ Player.prototype.updateX = function(){
 			})[0],
 		closestObjectNearestEdge = closestObject && ( self.direction === 'left' ? closestObject.position.x + closestObject.width : closestObject.position.x );
 
+
 	self.lastPosition.x = self.position.x;
 
 	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')){
@@ -234,7 +282,7 @@ Player.prototype.updateX = function(){
 Player.prototype.updateY = function(){
 	var self = this,
 		leadingCoord = self.getLeadingCorner(),
-		closestObject = self.game.objects
+		closestObject = self.stage.objects
 			.filter(function(object){
 				return object.isObstacle && object.isOneWay ? self.game.oneWaysEnabled : true;
 			})
@@ -321,6 +369,9 @@ function Platform(options,game){
 	this.color = options.color;
 	self.springiness = 0.2;
 
+	// todo: pass this in
+	this.stage = game.mainStage;
+
 	self.isOneWay = !!options.isOneWay;
 	self.isObstacle = true;
 
@@ -332,6 +383,40 @@ function Platform(options,game){
 }
 
 Platform.prototype = new Item();
+
+/*
+	stage
+		position
+			x
+			y
+		relativeMovementRatio
+*/
+
+function Stage(width, relativeMovementRatio,initialObjects,update){
+	var self = this;
+
+	self.objects = initialObjects || [];
+
+	self.update = update.bind(self);
+
+	self.position = {
+		x: 0,
+		y: 0
+	}
+
+	self.relativeMovementRatio = relativeMovementRatio;
+}
+
+Stage.prototype.addObject = function(object){
+	this.objects.push(object);
+};
+
+Stage.prototype.getPosition = function(object){
+	return {
+		x: object.position.x + this.position.x,
+		y: object.position.y + this.position.y
+	}
+}
 
 function Item(){
 	//todo: see if there is a way to get this to work
@@ -361,7 +446,7 @@ Item.prototype.getIntersectingItems = function(){
 		thisTop = this.position.y,
 		thisBottom = thisTop + this.height;
 
-	return this.game.objects.filter(function(item){
+	return this.stage.objects.filter(function(item){
 		var itemLeft = item.position.x,
 			itemRight = itemLeft + item.width,
 			itemTop = item.position.y,
@@ -379,14 +464,17 @@ Item.prototype.getIntersectingItems = function(){
 
 Item.prototype.itemsBelow = function(){
 	var self = this;
-	return self.game && self.game.objects.filter(function(object){
+	return self.game && self.stage.objects.filter(function(object){
 
 	}) || [];
 };
 
 Item.prototype.draw = function(){
+
+	var position = this.stage.getPosition(this);
+
 	this.drawTransformations && this.drawTransformations(this.game.ctx);
-	this.game.ctx.fillRect(this.position.x,this.position.y,this.width,this.height);
+	this.game.ctx.fillRect(position.x,position.y,this.width,this.height);
 };
 
 function KeyboardListener(){
