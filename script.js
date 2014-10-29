@@ -16,7 +16,7 @@ function Game(canvas){
 	self.stages = [new Stage(3000,1,[],function(player){
 
 		var playerPositionX = player.stage.getPosition(player).x,
-			activeZoneWidth = 300;
+			activeZoneWidth = 200;
 
 		// OPTION: player-centered camera
 		//this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
