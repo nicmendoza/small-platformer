@@ -28,7 +28,6 @@ function Game(canvas){
 		} else if(playerPositionX > self.width - activeZoneWidth ) {
 			this.position.x += (self.width-activeZoneWidth - playerPositionX);
 		};
-
 		
 	})];
 
