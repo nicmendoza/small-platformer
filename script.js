@@ -168,51 +168,40 @@ function Player(position,game){
 
 Player.prototype = new Item();
 
+Player.prototype.update = function(){
+	var self = this;
+
+	self.lastPosition.x = self.position.x;
+	self.lastPosition.y = self.position.y;
+
+	// face left if we need to
+	if(self.game.inputs.isDown('LEFT')){
+		self.direction = 'left';
+	}
+
+	// face right if we need to
+	if(self.game.inputs.isDown('RIGHT')){
+		self.direction = 'right';
+	}
+
+	//jump if we need to
+	self.game.inputs.isDown('SPACE') && !self.isFalling && self.jump();
+
+	self.updateCrouching(self.game.inputs.isDown('DOWN'));
+
+	self.updateX();
+	self.updateY();
+}
+
 Player.prototype.draw = function(){
 	var self = this,
 		intersectingItems = self.getIntersectingItems(),
 		position;
 
-	self.lastPosition.x = self.position.x;
-	self.lastPosition.y = self.position.y;
+	this.update();
 
-	/*
-
-		Note: probably need to re-organize this whole engine
-		to store tiles in an array
-
-
-		Get coords of leading corner:
-			{ 
-				x: left or right, 
-				y: top or bottom}
-			 depending on movement direction
-
-		
-		loop through supporting objects, find closest one
-		filter by whether or not they are on the screen
-
-
-	*/
-
-	//set facing direction
-	if(self.game.inputs.isDown('LEFT')){
-		self.direction = 'left';
-	}
-
-	if(self.game.inputs.isDown('RIGHT')){
-		self.direction = 'right';
-	}
-
-	self.game.inputs.isDown('SPACE') && !self.isFalling && self.jump();
-
-	self.updateCrouching(self.game.inputs.isDown('DOWN'));
-
-	// only close over these values AFTER position has been updated
+	// only close over these values AFTER player has updated
 	position = self.stage.getRenderPosition(self);
-
-	self.updateX();
-	self.updateY();
 
 	game.ctx.fillRect(position.x,position.y,self.width,self.height);
 	game.ctx.fillStyle = '#FF4444';
@@ -247,7 +236,6 @@ Player.prototype.getLeadingCorner = function(){
 
 	return {
 		// uses right edge as default, unless facing left
-		//todo: this seems backwards, and might be causing bugs. fix
 		x: this.direction === 'left' ? this.position.x: this.position.x + this.width,
 		// if falling, bottom, else top
 		y: this.momentum.y > 0 ? this.position.y + this.height : this.position.y
@@ -296,25 +284,25 @@ Player.prototype.updateX = function(){
 };
 
 Player.prototype.updateY = function(){
+
 	var self = this,
 		leadingCoord = self.getLeadingCorner(),
 		closestObject = self.stage.objects
+
 			.filter(function(object){
-				return object.isObstacle && object.isOneWay ? self.game.oneWaysEnabled : true;
+					// object can block player
+				return object.isObstacle && ( object.isOneWay ? self.game.oneWaysEnabled : true )
+
+					// player is over object
+					&& self.position.x + self.width > object.position.x
+					&& self.position.x < object.position.x + object.width
+
+					// player is higher than top of object
+					&& self.position.y + self.height <= object.position.y
+
+					// player was previously above object (not jumping through from bottom)
+					//&& self.position.y - self.momentum.y < object.position.y;
 			})
-			.filter(function(object){
-				// player is over object
-				return self.position.x + self.width > object.position.x
-					&& self.position.x < object.position.x + object.width;
-			})
-			.filter(function(object){
-				// player is higher than top of object
-				return self.position.y + self.height <= object.position.y;
-			})
-			// .filter(function(object){
-				// player was previously above object (not jumping through from bottom)
-			// 	return self.position.y - self.momentum.y < object.position.y;
-			// })
 			.sort(function(a,b){
 				//sort by closest to player
 				//need to handle them being equal
@@ -333,7 +321,7 @@ Player.prototype.updateY = function(){
 			self.momentum.y = -(Math.ceil( self.momentum.y * closestObject.springiness) );
 			// if we achieved bounce, get player off ground so they can actually bounce
 			if(self.momentum.y){
-				self.position.y -=.1;
+				self.position.y -= 0.1;
 			}
 			
 		}
@@ -347,21 +335,22 @@ Player.prototype.updateY = function(){
 		}
 
 	} else {
-		self.momentum.y += .2;
+		self.momentum.y += 0.2;
 		// comment out to fly :)
 		self.isFalling = true;
 	}
 
 
 	if(self.game.inputs.isDown('DOWN')){
-		self.game.oneWaysEnabled = false
+		self.game.oneWaysEnabled = false;
 	} else {
 		self.game.oneWaysEnabled = true;
 	}
 
 	self.position.y = self.position.y + ( closestObject ? Math.min(self.momentum.y, closestObjectNearestEdge - leadingCoord.y ) : self.momentum.y);
 	self.lastPosition.y = self.position.y;
-}
+
+};
 
 /*
 	Options: {
@@ -395,7 +384,7 @@ function Platform(options,game){
 
 	this.drawTransformations = function(ctx){
 		ctx.fillStyle = self.color;
-	}
+	};
 }
 
 Platform.prototype = new Item();
@@ -418,7 +407,7 @@ function Stage(width, relativeMovementRatio,initialObjects,update){
 	self.position = {
 		x: 0,
 		y: 0
-	}
+	};
 
 	self.relativeMovementRatio = relativeMovementRatio;
 }
@@ -431,8 +420,8 @@ Stage.prototype.getRenderPosition = function(object){
 	return {
 		x: object.position.x + this.position.x,
 		y: object.position.y + this.position.y
-	}
-}
+	};
+};
 
 function Item(){
 	//todo: see if there is a way to get this to work
@@ -505,7 +494,7 @@ function KeyboardListener(){
 		};
 
 	self.isDown = function(keyName){
-		return keys[keyName].length ? keys[keyName].some(function(keyCode){ return down[keyCode] }) : down[keys[keyName]];
+		return keys[keyName].length ? keys[keyName].some(function(keyCode){ return down[keyCode]; }) : down[keys[keyName]];
 	};
 
 	document.addEventListener('keydown',function(e){
