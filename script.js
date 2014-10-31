@@ -37,33 +37,17 @@ function Game(canvas,levelInstance){
 				activeZoneWidth = 200;
 
 			// OPTION: player-centered camera
-			this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
+			//this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
 
 			// OPTION: player-following camera
-			// if(playerPositionX < activeZoneWidth){
+			if(playerPositionX < activeZoneWidth){
 				
-			// 	this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
-			// } else if(playerPositionX > self.width - activeZoneWidth ) {
-			// 	this.position.x += (self.width-activeZoneWidth - playerPositionX);
-			// };
+				this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
+			} else if(playerPositionX > self.width - activeZoneWidth ) {
+				this.position.x += (self.width-activeZoneWidth - playerPositionX);
+			};
 			
-		}), new Stage(2000,1/3,[], function(player){
-
-			var playerPositionX = this.getRenderPosition(player).x,
-				activeZoneWidth = 200;
-
-			// OPTION: player-centered camera
-			this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
-
-			// // OPTION: player-following camera
-			// if(playerPositionX < activeZoneWidth){
-				
-			// 	this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
-			// } else if(playerPositionX > self.width - activeZoneWidth ) {
-			// 	this.position.x += (self.width-activeZoneWidth - playerPositionX);
-			// };
-			
-		})
+		}), new Stage(2000,1/3,[],function(){})
 	];
 
 	self.mainStage = self.stages[0];
