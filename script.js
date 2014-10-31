@@ -716,10 +716,10 @@ var aBasicLevel = function(){
 			color: '#F5D190'
 		},self),
 
-		// distand platforrm
+		// distan platforr
 		new Platform({
 			position: {
-				x: 1450,
+				x: 1400,
 				y: self.height - 30
 			},
 			height: 50,
@@ -763,15 +763,15 @@ var aBasicLevel = function(){
 	});
 
 
-	// new Array(35).join(',|').split(',').forEach(function(object,i){
-	// 	self.stages[0].addObject(new Enemy({
-	// 		position: {
-	// 			x: 0 + (i * 40),
-	// 			y: self.height - 80 - (i*25)
-	// 		}
+	new Array(35).join(',|').split(',').forEach(function(object,i){
+		self.stages[0].addObject(new Enemy({
+			position: {
+				x: 0 + (i * 70),
+				y: self.height - 80 - (i*25)
+			}
 			
-	// 	},self));
-	// });
+		},self));
+	});
 
 
 };
