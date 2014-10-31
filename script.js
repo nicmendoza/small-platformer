@@ -60,6 +60,7 @@ function Game(canvas,levelInstance){
 	});
 		
 	// create initial level
+	self.currentLevel = levelInstance;
 	self.setLevel(levelInstance);
 
 	self.reset = function(){
@@ -93,7 +94,7 @@ Game.prototype.draw = function(){
 	self.stages.forEach(function(stage){
 		stage.objects.forEach(function(object){
 			self.ctx.save();
-			object.draw();
+			object.draw(self.ctx);
 			self.ctx.restore();
 		});
 
@@ -108,7 +109,7 @@ Game.prototype.draw = function(){
 		
 	}
 
-	self.HUD.draw();
+	self.HUD.draw(self.ctx);
 	
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));
@@ -129,18 +130,22 @@ Game.prototype.setLevel = function(levelInstance){
 	levelInstance.call(this);
 };
 
+Game.prototype.resetLevel = function(){
+	this.setLevel(this.currentLevel);
+};
+
 function HUD(game){
 	var self = this;
 	self.game = game;
 	self.objects = [];
 }
 
-HUD.prototype.draw = function(){
+HUD.prototype.draw = function(ctx){
 	var self = this;
 	self.objects.forEach(function(object){
-		self.game.ctx.save();
+		ctx.save();
 		object.draw(self.game.ctx);
-		self.game.ctx.restore();
+		ctx.restore();
 	});
 };
 
@@ -167,6 +172,7 @@ function Player(position,game){
 	self.jumpSpeed = 3;
 	self.currentMovementSpeed = self.maxMovementSpeed;
 	self.direction = 'left';
+	self.isMovingObject = true;
 
 	self.stage = game.mainStage;
 
@@ -184,7 +190,26 @@ function Player(position,game){
 Player.prototype = new Item();
 
 Player.prototype.update = function(){
-	var self = this;
+	var self = this,
+		intersectingObjects = self.getIntersectingObjects(),
+		intersectingEnemies;
+
+	if(intersectingObjects.length){
+		intersectingEnemies = intersectingObjects.filter(function(object){
+			return object instanceof Enemy;
+		}).forEach(function(enemy){
+
+			if(self.momentum.y > 0 && !enemy.isDead && self.position.y + self.height - self.momentum.y <= enemy.position.y){
+				enemy.die();
+				self.momentum.y = -(self.momentum.y+1)
+			} else if(!enemy.isDead) {
+				self.die();
+			}
+		});
+
+
+	}
+
 
 	self.lastPosition.x = self.position.x;
 	self.lastPosition.y = self.position.y;
@@ -197,6 +222,12 @@ Player.prototype.update = function(){
 	// face right if we need to
 	if(self.game.inputs.isDown('RIGHT')){
 		self.direction = 'right';
+	}
+
+	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT') || self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
+		self.shouldMove = true;
+	} else {
+		self.shouldMove = false;
 	}
 
 	//jump if we need to
@@ -217,9 +248,8 @@ Player.prototype.update = function(){
 	self.updateY();
 }
 
-Player.prototype.draw = function(){
+Player.prototype.draw = function(ctx){
 	var self = this,
-		intersectingItems = self.getIntersectingItems(),
 		position;
 
 	this.update();
@@ -227,9 +257,15 @@ Player.prototype.draw = function(){
 	// only close over these values AFTER player has updated
 	position = self.stage.getRenderPosition(self);
 
-	game.ctx.fillRect(position.x,position.y,self.width,self.height);
-	game.ctx.fillStyle = '#FF4444';
-	game.ctx.fillRect(position.x + ( self.direction === 'left' ? -2 : 0 ),position.y-2,self.width+2,2);
+	ctx.fillRect(position.x,position.y,self.width,self.height);
+	ctx.fillStyle = '#FF4444';
+	ctx.fillRect(position.x + ( self.direction === 'left' ? -2 : 0 ),position.y-2,self.width+2,2);
+};
+
+Player.prototype.die = function(){
+	// some kind of animation
+
+	self.game.reset();
 };
 
 Player.prototype.updateCrouching = function(wantsToCrouch){
@@ -256,7 +292,7 @@ Player.prototype.jump = function(){
 	this.momentum.y = this.isCrouching ? -5 : -4;
 };
 
-Player.prototype.getLeadingCorner = function(){
+Item.prototype.getLeadingCorner = function(){
 
 	return {
 		// uses right edge as default, unless facing left
@@ -267,7 +303,7 @@ Player.prototype.getLeadingCorner = function(){
 };
 
 
-Player.prototype.updateX = function(){
+Item.prototype.updateX = function(withControls){
 	var self = this,
 		leadingXCoord = self.getLeadingCorner()['x'],
 		closestObject = self.stage.objects
@@ -297,17 +333,17 @@ Player.prototype.updateX = function(){
 
 	self.lastPosition.x = self.position.x;
 
-	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')){
+	if(self.shouldMove && self.direction === 'left'){
 		self.position.x = self.position.x - ( closestObject ? Math.min(movementSpeed,leadingXCoord - closestObjectNearestEdge) : movementSpeed );
 	}
 
-	if(self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
-		self.position.x = self.position.x +  ( closestObject ? Math.min(movementSpeed, closestObject.position.x - leadingXCoord ) : movementSpeed );			
+	if(self.shouldMove && self.direction === 'right'){
+		self.position.x = self.position.x +  ( closestObject ? Math.min(movementSpeed, closestObject.position.x - leadingXCoord ) : movementSpeed );
 	}
 
 };
 
-Player.prototype.updateY = function(){
+Item.prototype.updateY = function(){
 
 	var self = this,
 		leadingCoord = self.getLeadingCorner(),
@@ -368,6 +404,10 @@ Player.prototype.updateY = function(){
 
 };
 
+Item.prototype.turnAround = function(){
+	this.direction = this.direction === 'left' ? 'right' : 'left';
+}
+
 /*
 	Options: {
 		position: {
@@ -404,6 +444,52 @@ function Platform(options,game){
 }
 
 Platform.prototype = new Item();
+
+function Enemy(options,game){
+
+	var self = this;
+	self.position = options.position;
+	self.game = game;
+	self.width = 10;
+	self.height = 10;
+
+	self.maxMovementSpeed = 1;
+	self.currentMovementSpeed = self.maxMovementSpeed;
+
+	self.onUpdate = options.onUpdate;
+
+	self.momentum = {
+		x: 0,
+		y: 0.1
+	};
+
+	self.lastPosition = {};
+
+	self.direction = 'right';
+
+	self.isMovingObject = true;
+
+	this.stage = game.mainStage;
+
+	self.drawTransformations = function(ctx){
+		ctx.fillStyle = 'orange';
+	};
+
+	options.onInit && options.onInit.call(self);
+}
+
+Enemy.prototype = new Item();
+
+Enemy.prototype.die = function(){
+
+	this.isDead = true;
+	this.height = 2;
+	this.position.y += 8;
+	// hack to stop patrol movement
+	self.shouldMove = false;
+	// hack to strop patrol updates
+	delete this.onUpdate
+};
 
 /*
 	stage
@@ -464,7 +550,7 @@ Item.prototype.isDirectlyAbove = function(item){
 		&& thisRight < itemRight;
 };
 
-Item.prototype.getIntersectingItems = function(){
+Item.prototype.getIntersectingObjects = function(){
 	var thisItem = this,
 		thisLeft = this.position.x,
 		thisRight = thisLeft + this.width,
@@ -487,19 +573,22 @@ Item.prototype.getIntersectingItems = function(){
 	
 };
 
-Item.prototype.itemsBelow = function(){
-	var self = this;
-	return self.game && self.stage.objects.filter(function(object){
+Item.prototype.draw = function(ctx){
 
-	}) || [];
-};
+	this.update && this.update();
+	this.onUpdate && this.onUpdate();
 
-Item.prototype.draw = function(){
+	if(this.isMovingObject){
+		this.updateY && this.updateY();
+		this.updateX && this.updateX();
+	}
+
+	
 
 	var position = this.stage.getRenderPosition(this);
 
-	this.drawTransformations && this.drawTransformations(this.game.ctx);
-	this.game.ctx.fillRect(position.x,position.y,this.width,this.height);
+	this.drawTransformations && this.drawTransformations(ctx);
+	ctx.fillRect(position.x,position.y,this.width,this.height);
 };
 
 function KeyboardListener(){
@@ -536,50 +625,109 @@ var aBasicLevel = function(){
 	},self);
 
 	[  self.player,
-	// ground
-	new Platform({
-		position: {
-			x: 0,
-			y: self.height - 30
-		},
-		height: 50,
-		width: 1200,
-		color: '#F5D190'
-	},self),
-	// left-hand mesa
-	new Platform({
-		position: {
-			x: 0,
-			y: self.height -80
-		},
-		height: 50,
-		width: 250,
-		isOneWay: true,
-		color: '#CEAA6A'
-	},self),
-	// right-hand mesa
-	new Platform({
-		position: {
-			x: 500,
-			y: self.height -80
-		},
-		height: 50,
-		width: 50,
-		color: '#CEAA6A'
-	},self),
-	// green island
-	new Platform({
-		position: {
-			x: self.width - 80,
-			y: self.height - 80
-		},
-		height: 80,
-		width: 40,
-		color: '#7CAD8A'
-	},self)
+
+	// patrolling enemy
+		new Enemy({
+			position: {
+				x: self.width - 130,
+				y: self.height - 80
+			},
+			onInit: function(){
+				this.patrolDistance = 20;
+				this.patrolStartX = this.position.x
+				this.shouldMove = true;
+			},
+			onUpdate: function(){
+				if(Math.abs(this.patrolStartX - this.position.x) >= 20){
+					this.turnAround();
+				}
+			}
+		},self),
+
+
+		// jumping enemy
+		new Enemy({
+			position: {
+				x: self.width - 200,
+				y: self.height - 80
+			},
+			onUpdate: function(){
+
+				if(!this.isFalling){
+					this.momentum.y = -4
+					this.position.y+= 0.1;
+				}
+			}
+		},self),
+
+		// ground
+		new Platform({
+			position: {
+				x: 0,
+				y: self.height - 30
+			},
+			height: 50,
+			width: 1200,
+			color: '#F5D190'
+		},self),
+
+		// distand platforrm
+		new Platform({
+			position: {
+				x: 1450,
+				y: self.height - 30
+			},
+			height: 50,
+			width: 1200,
+			color: '#F5D190'
+		},self),
+
+		// left-hand mesa
+		new Platform({
+			position: {
+				x: 0,
+				y: self.height -80
+			},
+			height: 50,
+			width: 250,
+			isOneWay: true,
+			color: '#CEAA6A'
+		},self),
+		// right-hand mesa
+		new Platform({
+			position: {
+				x: 500,
+				y: self.height -80
+			},
+			height: 50,
+			width: 50,
+			color: '#CEAA6A'
+		},self),
+		// green island
+		new Platform({
+			position: {
+				x: self.width - 80,
+				y: self.height - 80
+			},
+			height: 80,
+			width: 40,
+			color: '#7CAD8A'
+		},self)
 	].reverse().forEach(function(object){
 		self.stages[0].addObject(object);
 	});
+
+
+	new Array(35).join(',|').split(',').forEach(function(object,i){
+		self.stages[0].addObject(new Enemy({
+			position: {
+				x: 0 + (i * 40),
+				y: self.height - 80 - (i*25)
+			}
+			
+		},self));
+	});
+
 
 };
 
