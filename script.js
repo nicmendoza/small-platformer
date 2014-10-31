@@ -30,25 +30,64 @@ function Game(canvas,levelInstance){
 
 	self.HUD = new HUD(self);
 
-	self.stages = [new Stage(3000,1,[],function(player){
+	self.stages = [
+		new Stage(3000,1,[],function(player){
 
-		var playerPositionX = player.stage.getRenderPosition(player).x,
-			activeZoneWidth = 200;
+			var playerPositionX = player.stage.getRenderPosition(player).x,
+				activeZoneWidth = 200;
 
-		// OPTION: player-centered camera
-		//this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
+			// OPTION: player-centered camera
+			this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
 
-		// OPTION: player-following camera
-		if(playerPositionX < activeZoneWidth){
+			// OPTION: player-following camera
+			// if(playerPositionX < activeZoneWidth){
+				
+			// 	this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
+			// } else if(playerPositionX > self.width - activeZoneWidth ) {
+			// 	this.position.x += (self.width-activeZoneWidth - playerPositionX);
+			// };
 			
-			this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
-		} else if(playerPositionX > self.width - activeZoneWidth ) {
-			this.position.x += (self.width-activeZoneWidth - playerPositionX);
-		};
-		
-	})];
+		}), new Stage(2000,1/3,[], function(player){
+
+			var playerPositionX = this.getRenderPosition(player).x,
+				activeZoneWidth = 200;
+
+			// OPTION: player-centered camera
+			this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
+
+			// // OPTION: player-following camera
+			// if(playerPositionX < activeZoneWidth){
+				
+			// 	this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
+			// } else if(playerPositionX > self.width - activeZoneWidth ) {
+			// 	this.position.x += (self.width-activeZoneWidth - playerPositionX);
+			// };
+			
+		})
+	];
 
 	self.mainStage = self.stages[0];
+
+	//cloud test
+	self.stages[1].addObject(new Platform({
+			position: {
+				x: 100,
+				y: 50
+			},
+			color: '#EFEFEF',
+			width: 400,
+			height: 100
+		},self));
+
+	self.stages[1].addObject(new Platform({
+			position: {
+				x: 2200,
+				y: 70
+			},
+			color: '#EFEFEF',
+			width: 300,
+			height: 90
+		},self));
 
 	// configre HUD
 
@@ -420,7 +459,7 @@ Item.prototype.turnAround = function(){
 	}
 */
 
-function Platform(options,game){
+function Platform(options,game,stage){
 	var self = this;
 
 	self.position = options.position;
@@ -431,7 +470,7 @@ function Platform(options,game){
 	self.springiness = 0.2;
 
 	// todo: pass this in
-	this.stage = game.mainStage;
+	this.stage = stage || game.mainStage;
 
 	self.isOneWay = !!options.isOneWay;
 	self.isObstacle = true;
@@ -506,6 +545,8 @@ function Stage(width, relativeMovementRatio,initialObjects,update){
 
 	self.update = update.bind(self);
 
+	self.relativeMovementRatio = relativeMovementRatio || 1;
+
 	self.position = {
 		x: 0,
 		y: 0
@@ -516,12 +557,14 @@ function Stage(width, relativeMovementRatio,initialObjects,update){
 
 Stage.prototype.addObject = function(object){
 	this.objects.push(object);
+	object.stage = this;
 };
 
 Stage.prototype.getRenderPosition = function(object){
+
 	return {
-		x: object.position.x + this.position.x,
-		y: object.position.y + this.position.y
+		x: ( object.position.x + this.position.x ) * this.relativeMovementRatio,
+		y: ( object.position.y + this.position.y ) * this.relativeMovementRatio
 	};
 };
 
@@ -583,9 +626,11 @@ Item.prototype.draw = function(ctx){
 		this.updateX && this.updateX();
 	}
 
-	
-
 	var position = this.stage.getRenderPosition(this);
+
+	if(this.color=== '#EFEFEF'){
+		//debugger;
+	}
 
 	this.drawTransformations && this.drawTransformations(ctx);
 	ctx.fillRect(position.x,position.y,this.width,this.height);
