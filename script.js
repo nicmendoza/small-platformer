@@ -15,7 +15,7 @@ function Game(canvas){
 
 	self.stages = [new Stage(3000,1,[],function(player){
 
-		var playerPositionX = player.stage.getPosition(player).x,
+		var playerPositionX = player.stage.getRenderPosition(player).x,
 			activeZoneWidth = 200;
 
 		// OPTION: player-centered camera
@@ -157,10 +157,10 @@ Player.prototype = new Item();
 Player.prototype.draw = function(){
 	var self = this,
 		intersectingItems = self.getIntersectingItems(),
-		position = self.stage.getPosition(self);
+		position;
 
-	self.lastPosition.x = position.x;
-	self.lastPosition.y = position.y;
+	self.lastPosition.x = self.position.x;
+	self.lastPosition.y = self.position.y;
 
 	/*
 
@@ -194,6 +194,9 @@ Player.prototype.draw = function(){
 
 	self.updateCrouching(self.game.inputs.isDown('DOWN'));
 
+	// only close over these values AFTER position has been updated
+	position = self.stage.getRenderPosition(self);
+
 	self.updateX();
 	self.updateY();
 
@@ -213,8 +216,8 @@ Player.prototype.updateCrouching = function(wantsToCrouch){
 
 	
 	if(wantsToCrouch && !self.isFalling && !self.isCrouching){
-		self.height = 6;
 		self.position.y += 4;
+		self.height = 6;
 		self.isCrouching = true;
 	}
 };
@@ -236,7 +239,6 @@ Player.prototype.getLeadingCorner = function(){
 		y: this.momentum.y > 0 ? this.position.y + this.height : this.position.y
 	}
 };
-
 
 
 Player.prototype.updateX = function(){
@@ -411,7 +413,7 @@ Stage.prototype.addObject = function(object){
 	this.objects.push(object);
 };
 
-Stage.prototype.getPosition = function(object){
+Stage.prototype.getRenderPosition = function(object){
 	return {
 		x: object.position.x + this.position.x,
 		y: object.position.y + this.position.y
@@ -471,7 +473,7 @@ Item.prototype.itemsBelow = function(){
 
 Item.prototype.draw = function(){
 
-	var position = this.stage.getPosition(this);
+	var position = this.stage.getRenderPosition(this);
 
 	this.drawTransformations && this.drawTransformations(this.game.ctx);
 	this.game.ctx.fillRect(position.x,position.y,this.width,this.height);
