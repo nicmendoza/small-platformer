@@ -1,3 +1,17 @@
+/*
+	@todo: break update and draw methods on player and other objects into two steps
+	@todo: background planes
+	@todo: enemies
+	@todo: moving enemies
+	@todo: moving platforms
+	@todo: artwork (top edges for platforms, repeating textures)
+	@todo: level design (and tooling)
+	@todo: ladders (?)
+	@todo: death (w/ counter and reset)
+	@todo: wall jumping (?)
+
+*/
+
 function Game(canvas){
 	var self = this;
 
