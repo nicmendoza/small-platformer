@@ -486,7 +486,7 @@ Enemy.prototype.die = function(){
 	this.height = 2;
 	this.position.y += 8;
 	// hack to stop patrol movement
-	self.shouldMove = false;
+	this.shouldMove = false;
 	// hack to strop patrol updates
 	delete this.onUpdate
 };
@@ -718,15 +718,15 @@ var aBasicLevel = function(){
 	});
 
 
-	new Array(35).join(',|').split(',').forEach(function(object,i){
-		self.stages[0].addObject(new Enemy({
-			position: {
-				x: 0 + (i * 40),
-				y: self.height - 80 - (i*25)
-			}
+	// new Array(35).join(',|').split(',').forEach(function(object,i){
+	// 	self.stages[0].addObject(new Enemy({
+	// 		position: {
+	// 			x: 0 + (i * 40),
+	// 			y: self.height - 80 - (i*25)
+	// 		}
 			
-		},self));
-	});
+	// 	},self));
+	// });
 
 
 };
