@@ -187,7 +187,16 @@ Player.prototype.update = function(){
 	//jump if we need to
 	self.game.inputs.isDown('SPACE') && !self.isFalling && self.jump();
 
+
+	if(self.game.inputs.isDown('DOWN')){
+		self.game.oneWaysEnabled = false;
+	} else {
+		self.game.oneWaysEnabled = true;
+	}
+
 	self.updateCrouching(self.game.inputs.isDown('DOWN'));
+
+
 
 	self.updateX();
 	self.updateY();
@@ -326,8 +335,6 @@ Player.prototype.updateY = function(){
 			
 		}
 
-		
-
 		//reset momentum while on ground (if player was already on ground previously)
 		if(self.lastPosition.y === self.position.y){
 			self.momentum.y = 0;
@@ -340,12 +347,6 @@ Player.prototype.updateY = function(){
 		self.isFalling = true;
 	}
 
-
-	if(self.game.inputs.isDown('DOWN')){
-		self.game.oneWaysEnabled = false;
-	} else {
-		self.game.oneWaysEnabled = true;
-	}
 
 	self.position.y = self.position.y + ( closestObject ? Math.min(self.momentum.y, closestObjectNearestEdge - leadingCoord.y ) : self.momentum.y);
 	self.lastPosition.y = self.position.y;
