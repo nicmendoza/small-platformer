@@ -1,5 +1,4 @@
 /*
-	@todo: break update and draw methods on player and other objects into two steps
 	@todo: background planes
 	@todo: enemies
 	@todo: moving enemies
@@ -7,12 +6,11 @@
 	@todo: artwork (top edges for platforms, repeating textures)
 	@todo: level design (and tooling)
 	@todo: ladders (?)
-	@todo: death (w/ counter and reset)
 	@todo: wall jumping (?)
 
 */
 
-function Game(canvas){
+function Game(canvas,levelInstance){
 	var self = this;
 
 	self.run = true;
@@ -23,9 +21,14 @@ function Game(canvas){
 	self.maxFallSpeed = 5;
 	self.tileSize = 5;
 
+	self.deaths = 0;
+
 	self.oneWaysEnabled = true;
 
 	self.ctx = canvas.getContext('2d');
+
+
+	self.HUD = new HUD(self);
 
 	self.stages = [new Stage(3000,1,[],function(player){
 
@@ -47,56 +50,27 @@ function Game(canvas){
 
 	self.mainStage = self.stages[0];
 
-	self.player = new Player({
-		x:self.width/2,
-		y:self.height - 70
-	},self);
+	// configre HUD
 
-	[  self.player,
-	// ground
-	new Platform({
-		position: { 
-			x: 0, 
-			y: self.height - 30
-		},
-		height: 50,
-		width: 1200,
-		color: '#F5D190'
-	},self),
-	// left-hand mesa
-	new Platform({
-		position: { 
-			x: 0, 
-			y: self.height -80
-		},
-		height: 50,
-		width: 250,
-		isOneWay: true,
-		color: '#CEAA6A'
-	},self),
-	// right-hand mesa
-	new Platform({
-		position: { 
-			x: 500, 
-			y: self.height -80
-		},
-		height: 50,
-		width: 50,
-		color: '#CEAA6A'
-	},self),
-	// green island
-	new Platform({
-		position: { 
-			x: self.width - 80, 
-			y: self.height - 80
-		},
-		height: 80,
-		width: 40,
-		color: '#7CAD8A'
-	},self)
-	].reverse().forEach(function(object){
-		self.stages[0].addObject(object);
+	self.HUD.addHUDItem({
+		draw: function(ctx){
+			ctx.font = '14px arial'
+			ctx.fillText('deaths: ' + self.deaths, 4,14);
+		}
 	});
+		
+	// create initial level
+	self.setLevel(levelInstance);
+
+	self.reset = function(){
+
+		self.mainStage.empty();
+
+		self.setLevel(levelInstance);
+		self.deaths++;
+		delete self.resetting;
+	};
+
 
 	/*	
 		array of stages
@@ -125,6 +99,16 @@ Game.prototype.draw = function(){
 
 		stage.update(self.player);
 	});
+
+	if(self.objectOutOfFrame(self.player)){
+		if(!self.resetting){
+			self.resetting = true;
+			setTimeout(self.reset,500);
+		}
+		
+	}
+
+	self.HUD.draw();
 	
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));
@@ -134,11 +118,42 @@ Game.prototype.draw = function(){
 
 Game.prototype.pushStages = function(leadingCorner){
 	//if(leadingCorner.x > )
-}
+};
 
-Game.prototype.objectOutOfFrame = function(){
+Game.prototype.objectOutOfFrame = function(object){
 	//todo: finish this
 	return object.position.y > game.height - object.height;
+};
+
+Game.prototype.setLevel = function(levelInstance){
+	levelInstance.call(this);
+};
+
+function HUD(game){
+	var self = this;
+	self.game = game;
+	self.objects = [];
+}
+
+HUD.prototype.draw = function(){
+	var self = this;
+	self.objects.forEach(function(object){
+		self.game.ctx.save();
+		object.draw(self.game.ctx);
+		self.game.ctx.restore();
+	});
+};
+
+HUD.prototype.addHUDItem = function(options){
+	this.objects.push(new HUDItem(this,this.game,options));
+};
+
+function HUDItem(HUD,game,options){
+	var self = this;
+
+	self.HUD = HUD;
+	self.game = game;
+	self.draw = options.draw;
 }
 
 function Player(position,game){
@@ -424,6 +439,10 @@ Stage.prototype.getRenderPosition = function(object){
 	};
 };
 
+Stage.prototype.empty = function(){
+	this.objects = [];
+}
+
 function Item(){
 	//todo: see if there is a way to get this to work
 	// var self = this;
@@ -507,4 +526,61 @@ function KeyboardListener(){
 	});
 }
 
-var game = new Game(document.getElementById('game'));
+var aBasicLevel = function(){
+
+	var self = this;
+
+	self.player = new Player({
+		x:self.width/2,
+		y:self.height - 70
+	},self);
+
+	[  self.player,
+	// ground
+	new Platform({
+		position: {
+			x: 0,
+			y: self.height - 30
+		},
+		height: 50,
+		width: 1200,
+		color: '#F5D190'
+	},self),
+	// left-hand mesa
+	new Platform({
+		position: {
+			x: 0,
+			y: self.height -80
+		},
+		height: 50,
+		width: 250,
+		isOneWay: true,
+		color: '#CEAA6A'
+	},self),
+	// right-hand mesa
+	new Platform({
+		position: {
+			x: 500,
+			y: self.height -80
+		},
+		height: 50,
+		width: 50,
+		color: '#CEAA6A'
+	},self),
+	// green island
+	new Platform({
+		position: {
+			x: self.width - 80,
+			y: self.height - 80
+		},
+		height: 80,
+		width: 40,
+		color: '#7CAD8A'
+	},self)
+	].reverse().forEach(function(object){
+		self.stages[0].addObject(object);
+	});
+
+};
+
+var game = new Game(document.getElementById('game'),aBasicLevel);
