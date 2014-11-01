@@ -19,6 +19,8 @@ function Game(canvas,levelInit){
 
 	self.height = canvas.height;
 	self.width = canvas.width;
+	this.backgroundColor = '#D7F8FC';
+
 	self.gravity = 10;
 	self.maxFallSpeed = 5;
 	self.oneWaysEnabled = true;
@@ -96,7 +98,14 @@ function Game(canvas,levelInit){
 Game.prototype.draw = function(){
 	var self = this,
 		stage;
-	this.ctx.clearRect(0,0,this.width,this.height);
+
+	self.ctx.save();
+	self.ctx.fillStyle = this.backgroundColor;
+	self.ctx.clearRect(0,0,this.width,this.height);
+	self.ctx.fillRect(0,0,this.width,this.height);
+	self.ctx.restore();
+
+	this.ctx.fillStyle = 'black';
 
 	for(var i = self.stages.length  - 1; i >= 0; i--){
 		stage = self.stages[i];
@@ -566,7 +575,8 @@ Enemy.prototype.die = function(){
 	this.position.y += 8;
 	this.momentum.x = 0;
 	// hack to strop patrol updates
-	delete this.onUpdate
+	delete this.onUpdate;
+	return true;
 };
 
 function Stage(game,relativeMovementRatio,initialObjects,update){
@@ -765,13 +775,16 @@ var aBasicLevel = function(game){
 					}
 
 					if(fireball.isAgainstWall()){
+						fireball.bounces++;
 						fireball.turnAround();
 					}
 
 					// kill enemies
 					fireball.getIntersectingObjects()
 						.forEach(function(object){
-							object instanceof Enemy && object.die();
+							if( object instanceof Enemy ) {
+								object.die() && fireball.die();
+							}
 						});
 
 					// limit bounces
@@ -831,7 +844,7 @@ var aBasicLevel = function(game){
 				y: game.height - 30
 			},
 			height: 50,
-			width: 1200,
+			width: 5200,
 			color: '#F5D190'
 		},game),
 
@@ -892,19 +905,8 @@ var aBasicLevel = function(game){
 		},game));
 	});
 
-	game.stages.push(new Stage(game,1/5,[],game.camera.playerStageFollowing));
+	game.stages.push(new Stage(game,1/8,[],game.camera.playerStageFollowing));
 
-	game.stages[1].addObject(
-		new Platform({
-			position: {
-				x: 500,
-				y: 20
-			},
-			height: 80,
-			width: 200,
-			color: '#EFEFEF'
-		},game)
-	);
 
 	// a cloud idea -- probably going to go with pre-drawn clouds, but this could be interesting too
 	var backgroundStageWidth = game.width * 1 / ( game.stages[1].relativeMovementRatio )
@@ -917,7 +919,31 @@ var aBasicLevel = function(game){
 			},
 			height: Math.round(200 * Math.random()),
 			width: Math.round(400 * Math.random()),
-			color: '#EFEFEF'
+			color: 'white'
+			
+		},game));
+	});
+
+
+
+	game.stages.push(new Stage(game,1/4,[],game.camera.playerStageFollowing));
+
+
+	// a mountain idea
+	var backgroundStageWidth = game.width * 1 / ( game.stages[1].relativeMovementRatio )
+
+	new Array(15).join(',|').split(',').forEach(function(object,i){
+
+		var height = Math.random() * 300;
+
+		game.stages[2].addObject(new Platform({
+			position: {
+				x: Math.round(backgroundStageWidth * Math.random()),
+				y: (game.height * 4) - height
+			},
+			height: height,
+			width: Math.round(200 * Math.random()),
+			color: '#D2BF9E'
 			
 		},game));
 	});
