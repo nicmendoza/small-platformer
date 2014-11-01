@@ -175,6 +175,8 @@ function Player(position,game){
 	self.direction = 'left';
 	self.isMovingObject = true;
 
+	self.pickups = [];
+
 	self.stage = game.mainStage;
 
 	self.isFalling = false;
@@ -193,21 +195,30 @@ Player.prototype = new Item();
 Player.prototype.update = function(){
 	var self = this,
 		intersectingObjects = self.getIntersectingObjects(),
-		intersectingEnemies;
+		intersectingEnemies, intersectingPickups;
 
 	if(intersectingObjects.length){
+
 		intersectingEnemies = intersectingObjects.filter(function(object){
 			return object instanceof Enemy;
-		}).forEach(function(enemy){
+		})
+			.forEach(function(enemy){
 
-			if(self.momentum.y > 0 && !enemy.isDead && self.position.y + self.height - self.momentum.y <= enemy.position.y){
-				enemy.die();
-				self.momentum.y = -(self.momentum.y+1)
-			} else if(!enemy.isDead) {
-				self.die();
-			}
-		});
+				if(self.momentum.y > 0 && self.position.y + self.height - self.momentum.y <= enemy.position.y){
+					enemy.die();
+					self.momentum.y = -(self.momentum.y+1)
+				} else if(!enemy.isDead) {
+					self.die();
+				}
+			});
 
+		intersectingPickups = intersectingObjects.filter(function(object){
+			return object instanceof Pickup
+		})
+			.forEach(function(pickup){
+				self.getPickup(pickup);
+				pickup.die();
+			});
 
 	}
 
@@ -229,6 +240,10 @@ Player.prototype.update = function(){
 		self.shouldMove = true;
 	} else {
 		self.shouldMove = false;
+	}
+
+	if( self.game.inputs.isDown('FIRE') ) {
+		self.usePickup();
 	}
 
 	//jump if we need to
@@ -286,12 +301,40 @@ Player.prototype.updateCrouching = function(wantsToCrouch){
 	}
 };
 
+Player.prototype.getPickup = function(object){
+	return this.pickups.length < 2 && !!this.pickups.push(object);
+};
+
+Player.prototype.usePickup = function(){
+	this.pickups[0] && this.pickups[0].use(this);
+}
+
 
 Player.prototype.jump = function(){
 	var self = this;
 	this.position.y+=.1;
 	this.momentum.y = this.isCrouching ? -5 : -4;
 };
+
+function Pickup(game,options){
+	this.use = options.onUse;
+	this.label = options.label;
+
+	this.position = options.position;
+	this.game = game;
+
+	this.width = 10;
+	this.height = 10;
+	this.drawTransformations = function(ctx){
+		ctx.fillStyle = 'blue';
+	}
+}
+
+Pickup.prototype = new Item();
+
+Pickup.prototype.die = function(){
+	this.stage.garbage.push(this);
+}
 
 Item.prototype.getLeadingCorner = function(){
 
@@ -409,6 +452,10 @@ Item.prototype.turnAround = function(){
 	this.direction = this.direction === 'left' ? 'right' : 'left';
 }
 
+Item.prototype.isOffScreen = function(){
+	//
+}
+
 /*
 	Options: {
 		position: {
@@ -484,6 +531,7 @@ Enemy.prototype = new Item();
 
 Enemy.prototype.die = function(){
 
+	if(this.isDead) return;
 	this.isDead = true;
 	this.height = 2;
 	this.position.y += 8;
@@ -505,10 +553,22 @@ function Stage(game,relativeMovementRatio,initialObjects,update){
 	var self = this;
 
 	self.objects = initialObjects || [];
-
-	self.update = update.bind(self);
+	self.garbage = [];
 
 	self.game = game;
+
+	var originalUpdate = update.bind(self)
+	self.update = function(player){
+		originalUpdate(player);
+		self.garbage.forEach(function(object){
+			console.log(
+				self.objects.splice(self.objects.indexOf(object),1)
+			);
+		});
+		self.garbage = [];	
+	};
+
+	
 
 	self.relativeMovementRatio = relativeMovementRatio || 1;
 
@@ -601,7 +661,8 @@ function KeyboardListener(){
 			'UP' : 		38,
 			'RIGHT': 	[39,68], // right arrow, d
 			'DOWN': 	[40,83],
-			'SPACE': 	32
+			'SPACE': 	32,
+			'FIRE': 	16 // shift key
 		};
 
 	self.isDown = function(keyName){
@@ -632,7 +693,73 @@ var aBasicLevel = function(game){
 
 	[  game.player,
 
-	// patrolling enemy
+		// fireball
+		new Pickup(self,{
+			position: {
+				x: 200,
+				y: game.height - 90
+			},
+			label: 'F',
+			color: 'blue',
+			onUse: function(player){
+
+
+				var now = new Date(),
+					fireball;
+
+				if(player.lastFired && now - player.lastFired < 500){
+					return;
+				}
+
+				player.lastFired = now;
+
+				fireball = new Item()
+
+				fireball.game = game;
+
+				fireball.width = 5;
+				fireball.height = 5;
+				fireball.position = {
+					x: player.position.x,
+					y: player.position.y
+				}
+				fireball.lastPosition = {}
+				fireball.momentum = {
+					x: 0,
+					y: 0
+				}
+				fireball.isMovingObject = true;
+
+				fireball.update = function(){
+					fireball.position.x +=1;
+
+					if(!fireball.isFalling){
+						fireball.momentum.y = -3;
+						fireball.position.y -= .1;
+					}
+
+					fireball.getIntersectingObjects()
+						.filter(function(object){return object instanceof Enemy})
+						.forEach(function(object){
+							object.die();
+						});
+
+					// if is off-screen, remove
+
+					// if is intersecting enemies, kill them,
+					// destroy self
+				}
+
+				fireball.drawTransformations = function(ctx){
+					ctx.fillStyle = 'red';
+				}
+
+				game.stages[0].addObject(fireball);
+
+			}
+		}),
+
+		// patrolling enemy
 		new Enemy({
 			position: {
 				x: game.width - 130,
@@ -718,21 +845,21 @@ var aBasicLevel = function(game){
 			height: 80,
 			width: 40,
 			color: '#7CAD8A'
-		},game)
+		},game),
 	].reverse().forEach(function(object){
 		game.stages[0].addObject(object);
 	});
 
 
-	new Array(35).join(',|').split(',').forEach(function(object,i){
-		game.stages[0].addObject(new Enemy({
-			position: {
-				x: 0 + (i * 70),
-				y: game.height - 80 - (i*25)
-			}
+	// new Array(35).join(',|').split(',').forEach(function(object,i){
+	// 	game.stages[0].addObject(new Enemy({
+	// 		position: {
+	// 			x: 0 + (i * 70),
+	// 			y: game.height - 80 - (i*25)
+	// 		}
 			
-		},game));
-	});
+	// 	},game));
+	// });
 
 	game.stages.push(new Stage(game,1/5,[],game.camera.playerStageFollowing));
 
