@@ -786,22 +786,23 @@ var aBasicLevel = function(game){
 		}),
 
 		// patrolling enemy
-		new Enemy({
-			position: {
-				x: game.width - 130,
-				y: game.height - 80
-			},
-			onInit: function(){
-				this.patrolDistance = 30;
-				this.patrolStartX = this.position.x
-				this.momentum.x = 1;
-			},
-			onUpdate: function(){
-				if(Math.abs(this.patrolStartX - this.position.x) >= 20){
-					this.turnAround();
-				}
-			}
-		},game),
+		// new Enemy({
+		// 	position: {
+		// 		x: game.width - 130,
+		// 		y: game.height - 80
+		// 	},
+		// 	onInit: function(){
+		// 		// this is optional
+		// 		this.patrolDistance = 200;
+		// 		this.patrolStartX = this.position.x
+		// 		this.momentum.x = 1;
+		// 	},
+		// 	onUpdate: function(){
+		// 		if(Math.abs(this.patrolStartX - this.position.x) >= this.patrolDistance || this.isAgainstWall() ){
+		// 			this.turnAround();
+		// 		}
+		// 	}
+		// },game),
 
 
 		// jumping enemy
@@ -810,11 +811,15 @@ var aBasicLevel = function(game){
 				x: game.width - 200,
 				y: game.height - 80
 			},
+			onInit: function(){
+				//this.momentum.x = -1;
+			},
 			onUpdate: function(){
 
-				if(!this.isFalling){
+				if(!this.isFalling && Math.random() * 100 > 95 ){
 					this.momentum.y = -4
 					this.position.y+= 0.1;
+					this.momentum.x = -(this.momentum.x);
 				}
 			}
 		},game),
