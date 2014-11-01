@@ -231,7 +231,7 @@ Player.prototype.update = function(){
 					enemy.die();
 					self.momentum.y = -(self.momentum.y+1)
 				} else if(!enemy.isDead) {
-					self.die();
+					self.die() || enemy.die();
 				}
 			});
 
@@ -301,9 +301,13 @@ Player.prototype.draw = function(ctx){
 	ctx.fillRect(position.x + ( self.direction === 'left' ? -2 : 0 ),position.y-2,self.width+2,2);
 };
 
+// returns false if player survives
 Player.prototype.die = function(){
 	// some kind of animation
-	self.game.reset();
+
+	return !this.losePickup() && self.game.reset();
+
+	
 };
 
 Player.prototype.updateCrouching = function(wantsToCrouch){
@@ -326,6 +330,10 @@ Player.prototype.updateCrouching = function(wantsToCrouch){
 Player.prototype.getPickup = function(object){
 	return this.pickups.length < this.maxPickups && !!this.pickups.push(object);
 };
+
+Player.prototype.losePickup = function(){
+	return this.pickups.pop();
+}
 
 Player.prototype.usePickup = function(){
 	this.pickups[0] && this.pickups[0].use(this);
