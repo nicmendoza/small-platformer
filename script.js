@@ -1,10 +1,15 @@
 /*
 
-	@todo: moving platforms
-	@todo: artwork (top edges for platforms, repeating textures)
-	@todo: level design (and tooling)
-	@todo: ladders (?)
-	@todo: wall jumping (?)
+	todo: moving platforms
+	todo: artwork (top edges for platforms, repeating textures)
+	todo: level design (and tooling) (svg?)
+	todo: ladders (?)
+	todo: wall jumping (?)
+	todo: convert x translations to using momentum instead of hard-coded movement speed
+	todo: figure out better way for objects to inherit methods
+	todo: try foreground objects
+
+	bug: rendering issue when drawing player on top of clouds
 
 */
 
