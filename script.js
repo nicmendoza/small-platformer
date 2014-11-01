@@ -745,7 +745,6 @@ var aBasicLevel = function(game){
 					}
 
 					fireball.getIntersectingObjects()
-						.filter(function(object){return })
 						.forEach(function(object){
 							object instanceof Enemy && object.die();
 						});
