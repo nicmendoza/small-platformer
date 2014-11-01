@@ -5,14 +5,10 @@
 	todo: level design (and tooling) (svg?)
 	todo: ladders (?)
 	todo: wall jumping (?)
-	todo: convert x translations to using momentum instead of hard-coded movement speed
 	todo: figure out better way for objects to inherit methods
 	todo: try foreground objects
 	todo: move enemy types/logic into config object or Enemy prototype
 	todo: path-following enemies
-	todo: fireball-type player weapon
-	todo: pickups
-	todo: push items to remove into collection to be removed at end of game.draw
 
 */
 
@@ -222,24 +218,24 @@ Player.prototype.update = function(){
 
 	}
 
-
 	self.lastPosition.x = self.position.x;
 	self.lastPosition.y = self.position.y;
 
 	// face left if we need to
 	if(self.game.inputs.isDown('LEFT')){
 		self.direction = 'left';
+		self.momentum.x = -(self.maxMovementSpeed);
 	}
 
 	// face right if we need to
 	if(self.game.inputs.isDown('RIGHT')){
 		self.direction = 'right';
+		self.momentum.x = self.maxMovementSpeed;
 	}
 
 	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT') || self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
-		self.shouldMove = true;
 	} else {
-		self.shouldMove = false;
+		self.momentum.x = 0;
 	}
 
 	if( self.game.inputs.isDown('FIRE') ) {
@@ -373,12 +369,12 @@ Item.prototype.updateX = function(withControls){
 
 	self.lastPosition.x = self.position.x;
 
-	if(self.shouldMove && self.direction === 'left'){
-		self.position.x = self.position.x - ( closestObject ? Math.min(movementSpeed,leadingXCoord - closestObjectNearestEdge) : movementSpeed );
-	}
-
-	if(self.shouldMove && self.direction === 'right'){
-		self.position.x = self.position.x +  ( closestObject ? Math.min(movementSpeed, closestObject.position.x - leadingXCoord ) : movementSpeed );
+	if(self.momentum.x < 0){
+		self.position.x = self.position.x + ( closestObject ? Math.min(self.momentum.x,leadingXCoord - closestObjectNearestEdge) : self.momentum.x );
+		self.direction = 'left';
+	} else if(self.momentum.x > 0){
+		self.position.x = self.position.x +  ( closestObject ? Math.min(self.momentum.x, closestObject.position.x - leadingXCoord ) : self.momentum.x );
+		self.direction = 'right';
 	}
 
 };
@@ -446,6 +442,7 @@ Item.prototype.updateY = function(){
 
 Item.prototype.turnAround = function(){
 	this.direction = this.direction === 'left' ? 'right' : 'left';
+	this.momentum.x = -(this.momentum.x);
 };
 
 Item.prototype.isOffScreen = function(){
@@ -453,6 +450,10 @@ Item.prototype.isOffScreen = function(){
 		return true;
 	}
 };
+
+Item.prototype.isAgainstWall = function(){
+	return this.position.x === this.lastPosition.x;
+}
 
 Item.prototype.die = function(){
 	this.stage.garbage.push(this);
@@ -537,8 +538,7 @@ Enemy.prototype.die = function(){
 	this.isDead = true;
 	this.height = 2;
 	this.position.y += 8;
-	// hack to stop patrol movement
-	this.shouldMove = false;
+	this.momentum.x = 0;
 	// hack to strop patrol updates
 	delete this.onUpdate
 };
@@ -705,50 +705,63 @@ var aBasicLevel = function(game){
 			onUse: function(player){
 
 
+
 				var now = new Date(),
 					fireDelay = 500,
 					maxBounces = 15,
 					fireball;
 
+				// prevent rapid-fire
 				if(player.lastFired && now - player.lastFired < fireDelay){
 					return;
 				}
 
 				player.lastFired = now;
 
-				fireball = new Item()
+				fireball = new Item();
 
 				fireball.game = game;
 
 				fireball.width = 5;
 				fireball.height = 5;
 				fireball.position = {
-					x: player.position.x,
+					x: player.position.x + ( player.direction === 'left' ? -5 :  player.width),
 					y: player.position.y
 				}
-				fireball.lastPosition = {}
+				fireball.lastPosition = {};
+
 				fireball.momentum = {
-					x: 0,
+					x: player.momentum.x * 1.2 || ( player.direction === 'left' ? -2 : 2),
 					y: 0
 				}
+
+				fireball.direction = player.direction;
+
 				fireball.isMovingObject = true;
+				fireball.isFalling = true;
 
 				fireball.bounces = 0;
 
-				fireball.update = function(){
-					fireball.position.x +=1;
+				fireball.onUpdate = function(){
 
+					//force a bounce!
 					if(!fireball.isFalling){
 						fireball.momentum.y = -3;
 						fireball.position.y -= 0.1;
 						fireball.bounces++;
 					}
 
+					if(fireball.isAgainstWall()){
+						fireball.momentum.x = -(fireball.momentum.x);
+					}
+
+					// kill enemies
 					fireball.getIntersectingObjects()
 						.forEach(function(object){
 							object instanceof Enemy && object.die();
 						});
 
+					// limit bounces
 					if(fireball.bounces > maxBounces || fireball.isOffScreen()){
 						fireball.die();
 					}
@@ -770,9 +783,9 @@ var aBasicLevel = function(game){
 				y: game.height - 80
 			},
 			onInit: function(){
-				this.patrolDistance = 20;
+				this.patrolDistance = 30;
 				this.patrolStartX = this.position.x
-				this.shouldMove = true;
+				this.momentum.x = 1;
 			},
 			onUpdate: function(){
 				if(Math.abs(this.patrolStartX - this.position.x) >= 20){
@@ -855,15 +868,15 @@ var aBasicLevel = function(game){
 	});
 
 
-	new Array(35).join(',|').split(',').forEach(function(object,i){
-		game.stages[0].addObject(new Enemy({
-			position: {
-				x: 0 + (i * 70),
-				y: game.height - 80 - (i*25)
-			}
+	// new Array(35).join(',|').split(',').forEach(function(object,i){
+	// 	game.stages[0].addObject(new Enemy({
+	// 		position: {
+	// 			x: 0 + (i * 70),
+	// 			y: game.height - 80 - (i*25)
+	// 		}
 			
-		},game));
-	});
+	// 	},game));
+	// });
 
 	game.stages.push(new Stage(game,1/5,[],game.camera.playerStageFollowing));
 
@@ -894,6 +907,8 @@ var aBasicLevel = function(game){
 			
 		},game));
 	});
+
+	game.player.getPickup(game.stages[0].objects[7])
 
 
 };
