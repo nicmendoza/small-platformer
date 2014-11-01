@@ -1,7 +1,5 @@
 /*
-	@todo: background planes
-	@todo: enemies
-	@todo: moving enemies
+
 	@todo: moving platforms
 	@todo: artwork (top edges for platforms, repeating textures)
 	@todo: level design (and tooling)
@@ -10,7 +8,7 @@
 
 */
 
-function Game(canvas,levelInstance){
+function Game(canvas,levelInit){
 	var self = this;
 
 	self.run = true;
@@ -19,43 +17,17 @@ function Game(canvas,levelInstance){
 	self.width = canvas.width;
 	self.gravity = 10;
 	self.maxFallSpeed = 5;
-	self.tileSize = 5;
+	self.oneWaysEnabled = true;
 
 	self.deaths = 0;
 
-	self.oneWaysEnabled = true;
-
 	self.ctx = canvas.getContext('2d');
-
 
 	self.HUD = new HUD(self);
 
-	self.stages = [
-		new Stage(3000,1,[],function(player){
+	self.stages = [];
 
-			var playerPositionX = this.getRenderPosition(player).x,
-				activeZoneWidth = 200;
-
-				//console.log(playerPositionX)
-
-			// OPTION: player-centered camera
-			//this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
-
-			// OPTION: player-following camera
-			if(playerPositionX < activeZoneWidth){
-				
-				this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
-			} else if(playerPositionX > self.width - activeZoneWidth ) {
-				this.position.x += (self.width-activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
-			};
-			
-		})
-	];
-
-	self.mainStage = self.stages[0];
-
-	// configre HUD
-
+	// configure HUD
 	self.HUD.addHUDItem({
 		draw: function(ctx){
 			ctx.font = '14px arial'
@@ -64,27 +36,17 @@ function Game(canvas,levelInstance){
 	});
 		
 	// create initial level
-	self.currentLevel = levelInstance;
-	self.setLevel(levelInstance);
+	self.currentLevel = levelInit;
+	self.setLevel(levelInit);
 
 	self.reset = function(){
 
-		self.mainStage.empty();
+		self.stages = [];
 
-		self.setLevel(levelInstance);
+		self.setLevel(levelInit);
 		self.deaths++;
 		delete self.resetting;
 	};
-
-
-	/*	
-		array of stages
-
-		when player moves (near edge of screen),
-		stage position is updated by the amount of the player's movement,
-		proportionally to its perceived distance
-
-	*/
 
 	self.inputs = new KeyboardListener();
 
@@ -95,7 +57,7 @@ function Game(canvas,levelInstance){
 Game.prototype.draw = function(){
 	var self = this;
 	this.ctx.clearRect(0,0,this.width,this.height);
-	self.stages.forEach(function(stage){
+	self.stages.reverse().forEach(function(stage){
 		stage.objects.forEach(function(object){
 			self.ctx.save();
 			object.draw(self.ctx);
@@ -130,13 +92,35 @@ Game.prototype.objectOutOfFrame = function(object){
 	return object.position.y > game.height - object.height;
 };
 
-Game.prototype.setLevel = function(levelInstance){
-	levelInstance.call(this);
+Game.prototype.setLevel = function(levelInit){
+	levelInit.call(this,this);
 };
 
 Game.prototype.resetLevel = function(){
 	this.setLevel(this.currentLevel);
 };
+
+Game.prototype.camera = {
+	playerFollowing: function(player){
+		this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
+	},
+	playerNudging: function(player){
+
+		var activeZoneWidth = 200,
+			// get player's drawn location
+			playerPositionX = this.getRenderPosition(player).x;
+
+		if(playerPositionX < activeZoneWidth){
+			this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
+		} else if(playerPositionX > this.game.width - activeZoneWidth ) {
+			this.position.x += (this.game.width - activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
+		};
+	},
+	playerStageFollowing: function(player){
+		this.position.x = player.stage.position.x;
+		this.position.y = player.stage.position.y
+	}
+}
 
 function HUD(game){
 	var self = this;
@@ -439,6 +423,7 @@ function Platform(options,game,stage){
 
 	self.isOneWay = !!options.isOneWay;
 	self.isObstacle = true;
+	self.isMovingObject = false;
 
 	self.canSupportPlayer = true;
 
@@ -503,12 +488,14 @@ Enemy.prototype.die = function(){
 		relativeMovementRatio
 */
 
-function Stage(width, relativeMovementRatio,initialObjects,update){
+function Stage(game,relativeMovementRatio,initialObjects,update){
 	var self = this;
 
 	self.objects = initialObjects || [];
 
 	self.update = update.bind(self);
+
+	self.game = game;
 
 	self.relativeMovementRatio = relativeMovementRatio || 1;
 
@@ -532,10 +519,6 @@ Stage.prototype.getRenderPosition = function(object){
 		y: ( object.position.y + this.position.y ) * this.relativeMovementRatio
 	};
 };
-
-Stage.prototype.empty = function(){
-	this.objects = [];
-}
 
 function Item(){
 	//todo: see if there is a way to get this to work
@@ -625,22 +608,26 @@ function KeyboardListener(){
 	});
 }
 
-var aBasicLevel = function(){
+var aBasicLevel = function(game){
 
 	var self = this;
 
-	self.player = new Player({
-		x:self.width/2,
-		y:self.height - 70
-	},self);
+	game.player = new Player({
+		x:game.width/2,
+		y:game.height - 70
+	},game);
 
-	[  self.player,
+	game.stages.push(
+		new Stage(self,1,[],self.camera.playerNudging)
+	);
+
+	[  game.player,
 
 	// patrolling enemy
 		new Enemy({
 			position: {
-				x: self.width - 130,
-				y: self.height - 80
+				x: game.width - 130,
+				y: game.height - 80
 			},
 			onInit: function(){
 				this.patrolDistance = 20;
@@ -652,14 +639,14 @@ var aBasicLevel = function(){
 					this.turnAround();
 				}
 			}
-		},self),
+		},game),
 
 
 		// jumping enemy
 		new Enemy({
 			position: {
-				x: self.width - 200,
-				y: self.height - 80
+				x: game.width - 200,
+				y: game.height - 80
 			},
 			onUpdate: function(){
 
@@ -668,75 +655,105 @@ var aBasicLevel = function(){
 					this.position.y+= 0.1;
 				}
 			}
-		},self),
+		},game),
 
 		// ground
 		new Platform({
 			position: {
 				x: 0,
-				y: self.height - 30
+				y: game.height - 30
 			},
 			height: 50,
 			width: 1200,
 			color: '#F5D190'
-		},self),
+		},game),
 
 		// distan platforr
 		new Platform({
 			position: {
 				x: 1400,
-				y: self.height - 30
+				y: game.height - 30
 			},
 			height: 50,
 			width: 1200,
 			color: '#F5D190'
-		},self),
+		},game),
 
 		// left-hand mesa
 		new Platform({
 			position: {
 				x: 0,
-				y: self.height -80
+				y: game.height -80
 			},
 			height: 50,
 			width: 250,
 			isOneWay: true,
 			color: '#CEAA6A'
-		},self),
+		},game),
 		// right-hand mesa
 		new Platform({
 			position: {
 				x: 500,
-				y: self.height -80
+				y: game.height -80
 			},
 			height: 50,
 			width: 50,
 			color: '#CEAA6A'
-		},self),
+		},game),
 		// green island
 		new Platform({
 			position: {
-				x: self.width - 80,
-				y: self.height - 80
+				x: game.width - 80,
+				y: game.height - 80
 			},
 			height: 80,
 			width: 40,
 			color: '#7CAD8A'
-		},self)
+		},game)
 	].reverse().forEach(function(object){
-		self.stages[0].addObject(object);
+		game.stages[0].addObject(object);
 	});
 
 
-	// new Array(35).join(',|').split(',').forEach(function(object,i){
-	// 	self.stages[0].addObject(new Enemy({
-	// 		position: {
-	// 			x: 0 + (i * 70),
-	// 			y: self.height - 80 - (i*25)
-	// 		}
+	new Array(35).join(',|').split(',').forEach(function(object,i){
+		game.stages[0].addObject(new Enemy({
+			position: {
+				x: 0 + (i * 70),
+				y: game.height - 80 - (i*25)
+			}
 			
-	// 	},self));
-	// });
+		},game));
+	});
+
+	game.stages.push(new Stage(game,1/5,[],game.camera.playerStageFollowing));
+
+	game.stages[1].addObject(
+		new Platform({
+			position: {
+				x: 500,
+				y: 20
+			},
+			height: 80,
+			width: 200,
+			color: '#EFEFEF'
+		},game)
+	);
+
+	// a cloud idea -- probably going to go with pre-drawn clouds, but this could be interesting too
+	var backgroundStageWidth = game.width * 1 / ( game.stages[1].relativeMovementRatio )
+
+	new Array(15).join(',|').split(',').forEach(function(object,i){
+		game.stages[1].addObject(new Platform({
+			position: {
+				x: Math.round(backgroundStageWidth * Math.random()),
+				y: Math.round( (game.height/3 - 200) * Math.random())
+			},
+			height: Math.round(200 * Math.random()),
+			width: Math.round(400 * Math.random()),
+			color: '#EFEFEF'
+			
+		},game));
+	});
 
 
 };
