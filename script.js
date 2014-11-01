@@ -414,21 +414,21 @@ Item.prototype.updateY = function(){
 		closestObject = self.stage.objects
 
 			.filter(function(object){
-					// object can block player
-				return object.isObstacle && ( object.isOneWay ? self.game.oneWaysEnabled : true )
+					// object can block current item we're evaluating
+				return object.isObstacle && ( !(self instanceof Player) || ( object.isOneWay ? self.game.oneWaysEnabled : true ) )
 
-					// player is over object
+					// current item we're evaluating is over object
 					&& self.position.x + self.width > object.position.x
 					&& self.position.x < object.position.x + object.width
 
-					// player is higher than top of object
+					// current item we're evaluating is higher than top of object
 					&& self.position.y + self.height <= object.position.y
 
-					// player was previously above object (not jumping through from bottom)
+					// current item we're evaluating was previously above object (not jumping through from bottom)
 					//&& self.position.y - self.momentum.y < object.position.y;
 			})
 			.sort(function(a,b){
-				//sort by closest to player
+				//sort by closest to current item we're evaluating
 				//need to handle them being equal
 				return Math.abs(self.position.y - a.position.y) > Math.abs(self.position.y - b.position.y) ? 1 : 0;
 			})[0],
