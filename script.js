@@ -8,8 +8,11 @@
 	todo: convert x translations to using momentum instead of hard-coded movement speed
 	todo: figure out better way for objects to inherit methods
 	todo: try foreground objects
-
-	bug: rendering issue when drawing player on top of clouds
+	todo: move enemy types/logic into config object or Enemy prototype
+	todo: path-following enemies
+	todo: fireball-type player weapon
+	todo: pickups
+	todo: push items to remove into collection to be removed at end of game.draw
 
 */
 
@@ -60,9 +63,13 @@ function Game(canvas,levelInit){
 }
 
 Game.prototype.draw = function(){
-	var self = this;
+	var self = this,
+		stage;
 	this.ctx.clearRect(0,0,this.width,this.height);
-	self.stages.reverse().forEach(function(stage){
+
+	for(var i = self.stages.length  - 1; i >= 0; i--){
+		stage = self.stages[i];
+
 		stage.objects.forEach(function(object){
 			self.ctx.save();
 			object.draw(self.ctx);
@@ -70,7 +77,8 @@ Game.prototype.draw = function(){
 		});
 
 		stage.update(self.player);
-	});
+
+	}
 
 	if(self.objectOutOfFrame(self.player)){
 		if(!self.resetting){
@@ -580,10 +588,6 @@ Item.prototype.draw = function(ctx){
 	}
 
 	var position = this.stage.getRenderPosition(this);
-
-	if(this.color=== '#EFEFEF'){
-		//debugger;
-	}
 
 	this.drawTransformations && this.drawTransformations(ctx);
 	ctx.fillRect(position.x,position.y,this.width,this.height);
