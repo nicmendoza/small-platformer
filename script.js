@@ -370,7 +370,10 @@ Item.prototype.updateX = function(withControls){
 	self.lastPosition.x = self.position.x;
 
 	if(self.momentum.x < 0){
-		self.position.x = self.position.x + ( closestObject ? Math.min(self.momentum.x,leadingXCoord - closestObjectNearestEdge) : self.momentum.x );
+
+		
+
+		self.position.x = self.position.x + ( closestObject ? Math.max(self.momentum.x, closestObjectNearestEdge - leadingXCoord ) : self.momentum.x );
 		self.direction = 'left';
 	} else if(self.momentum.x > 0){
 		self.position.x = self.position.x +  ( closestObject ? Math.min(self.momentum.x, closestObject.position.x - leadingXCoord ) : self.momentum.x );
@@ -442,7 +445,10 @@ Item.prototype.updateY = function(){
 
 Item.prototype.turnAround = function(){
 	this.direction = this.direction === 'left' ? 'right' : 'left';
+	// flip its momentum
 	this.momentum.x = -(this.momentum.x);
+	// get it off the wall
+	this.position.x += this.momentum.x;
 };
 
 Item.prototype.isOffScreen = function(){
@@ -725,7 +731,7 @@ var aBasicLevel = function(game){
 				fireball.width = 5;
 				fireball.height = 5;
 				fireball.position = {
-					x: player.position.x + ( player.direction === 'left' ? -5 :  player.width),
+					x: player.position.x,
 					y: player.position.y
 				}
 				fireball.lastPosition = {};
@@ -752,7 +758,7 @@ var aBasicLevel = function(game){
 					}
 
 					if(fireball.isAgainstWall()){
-						fireball.momentum.x = -(fireball.momentum.x);
+						fireball.turnAround();
 					}
 
 					// kill enemies
@@ -868,15 +874,15 @@ var aBasicLevel = function(game){
 	});
 
 
-	// new Array(35).join(',|').split(',').forEach(function(object,i){
-	// 	game.stages[0].addObject(new Enemy({
-	// 		position: {
-	// 			x: 0 + (i * 70),
-	// 			y: game.height - 80 - (i*25)
-	// 		}
+	new Array(35).join(',|').split(',').forEach(function(object,i){
+		game.stages[0].addObject(new Enemy({
+			position: {
+				x: 0 + (i * 70),
+				y: game.height - 80 - (i*25)
+			}
 			
-	// 	},game));
-	// });
+		},game));
+	});
 
 	game.stages.push(new Stage(game,1/5,[],game.camera.playerStageFollowing));
 
@@ -908,7 +914,8 @@ var aBasicLevel = function(game){
 		},game));
 	});
 
-	game.player.getPickup(game.stages[0].objects[7])
+	// to test having player have pickup immediately;
+	//game.player.getPickup(game.stages[0].objects[7])
 
 
 };
