@@ -38,6 +38,41 @@ function Game(canvas,levelInit){
 			ctx.fillText('deaths: ' + self.deaths, 4,14);
 		}
 	});
+
+	self.HUD.addHUDItem({
+		draw: function(ctx){
+
+			var size = 50,
+				gutter = 10
+				drawY = gutter;
+
+			ctx.font = '14px arial';
+
+			for(var i = 0; i < game.player.maxPickups; i++){
+				drawHUDBox(self.width - size - gutter, drawY, size, self.player.pickups[i]);
+				drawY += ( size + gutter );
+			}
+
+			function drawHUDBox(x,y,size,pickup){
+				ctx.fillStyle = 'rgba(222,222,222,0.7)';
+				ctx.fillRect(x,y, size, size );
+				ctx.fillStyle = '#F9F9F9';
+				ctx.fillRect( x + gutter / 2, y + gutter / 2, size * 0.8, size * 0.8 );
+
+				if(pickup){
+
+					pickup.drawTransformations(ctx);
+
+					ctx.fillRect( x + gutter / 2, y + gutter / 2, size * 0.8, size * 0.8 );
+
+					ctx.font = '10px arial';
+					ctx.fillStyle = 'white';
+					ctx.fillText( pickup.label,x + ( size - ctx.measureText( pickup.label).width ) / 2 , y + ( size / 2 ) );
+				}
+			}
+
+		}
+	});
 		
 	// create initial level
 	self.currentLevel = levelInit;
@@ -76,7 +111,7 @@ Game.prototype.draw = function(){
 
 	}
 
-	if(self.objectOutOfFrame(self.player)){
+	if(self.player.isOffScreen()){
 		if(!self.resetting){
 			self.resetting = true;
 			setTimeout(self.reset,500);
@@ -90,15 +125,6 @@ Game.prototype.draw = function(){
 		window.requestAnimationFrame(this.draw.bind(this));
 	}
 	
-};
-
-Game.prototype.pushStages = function(leadingCorner){
-	//if(leadingCorner.x > )
-};
-
-Game.prototype.objectOutOfFrame = function(object){
-	//todo: finish this
-	return object.position.y > game.height - object.height;
 };
 
 Game.prototype.setLevel = function(levelInit){
@@ -172,6 +198,7 @@ function Player(position,game){
 	self.isMovingObject = true;
 
 	self.pickups = [];
+	self.maxPickups = 2;
 
 	self.stage = game.mainStage;
 
@@ -276,7 +303,6 @@ Player.prototype.draw = function(ctx){
 
 Player.prototype.die = function(){
 	// some kind of animation
-
 	self.game.reset();
 };
 
@@ -298,7 +324,7 @@ Player.prototype.updateCrouching = function(wantsToCrouch){
 };
 
 Player.prototype.getPickup = function(object){
-	return this.pickups.length < 2 && !!this.pickups.push(object);
+	return this.pickups.length < this.maxPickups && !!this.pickups.push(object);
 };
 
 Player.prototype.usePickup = function(){
@@ -321,9 +347,8 @@ function Pickup(game,options){
 
 	this.width = 10;
 	this.height = 10;
-	this.drawTransformations = function(ctx){
-		ctx.fillStyle = 'blue';
-	}
+
+	this.drawTransformations = options.drawTransformations;
 }
 
 Pickup.prototype = new Item();
@@ -465,18 +490,6 @@ Item.prototype.die = function(){
 	this.stage.garbage.push(this);
 }
 
-/*
-	Options: {
-		position: {
-			x: 0,
-			y: 0
-		},
-		height: 10,
-		width: 10,
-		allowDown: false
-	}
-*/
-
 function Platform(options,game,stage){
 	var self = this;
 
@@ -487,7 +500,6 @@ function Platform(options,game,stage){
 	this.color = options.color;
 	self.springiness = 0.2;
 
-	// todo: pass this in
 	this.stage = stage || game.mainStage;
 
 	self.isOneWay = !!options.isOneWay;
@@ -549,14 +561,6 @@ Enemy.prototype.die = function(){
 	delete this.onUpdate
 };
 
-/*
-	stage
-		position
-			x
-			y
-		relativeMovementRatio
-*/
-
 function Stage(game,relativeMovementRatio,initialObjects,update){
 	var self = this;
 
@@ -574,8 +578,6 @@ function Stage(game,relativeMovementRatio,initialObjects,update){
 		});
 		self.garbage = [];	
 	};
-
-	
 
 	self.relativeMovementRatio = relativeMovementRatio || 1;
 
@@ -600,7 +602,8 @@ Stage.prototype.getRenderPosition = function(object){
 	};
 };
 
-function Item(){
+function Item(game, options){
+
 	//todo: see if there is a way to get this to work
 	// var self = this;
 	// [].slice.call(arguments).forEach(function(arg){
@@ -609,17 +612,6 @@ function Item(){
 	// 	}
 	// });
 }
-
-Item.prototype.isDirectlyAbove = function(item){
-
-	var thisLeft = this.position.x,
-		thisRight = this.position.x + this.width,
-		itemLeft = item.position.x,
-		itemRight = item.position.x + item.width;
-
-	return thisLeft > itemLeft
-		&& thisRight < itemRight;
-};
 
 Item.prototype.getIntersectingObjects = function(){
 	var thisItem = this,
@@ -706,8 +698,11 @@ var aBasicLevel = function(game){
 				x: 200,
 				y: game.height - 90
 			},
-			label: 'F',
-			color: 'blue',
+			label: 'Fireball',
+			color: 'red',
+			drawTransformations: function(ctx){
+				ctx.fillStyle = 'red';
+			},
 			onUse: function(player){
 
 
@@ -748,6 +743,10 @@ var aBasicLevel = function(game){
 
 				fireball.bounces = 0;
 
+				fireball.drawTransformations = function(ctx){
+					ctx.fillStyle = 'red';
+				}
+
 				fireball.onUpdate = function(){
 
 					//force a bounce!
@@ -771,10 +770,6 @@ var aBasicLevel = function(game){
 					if(fireball.bounces > maxBounces || fireball.isOffScreen()){
 						fireball.die();
 					}
-				}
-
-				fireball.drawTransformations = function(ctx){
-					ctx.fillStyle = 'red';
 				}
 
 				game.stages[0].addObject(fireball);
