@@ -706,9 +706,11 @@ var aBasicLevel = function(game){
 
 
 				var now = new Date(),
+					fireDelay = 500,
+					maxBounces = 15,
 					fireball;
 
-				if(player.lastFired && now - player.lastFired < 500){
+				if(player.lastFired && now - player.lastFired < fireDelay){
 					return;
 				}
 
@@ -731,21 +733,24 @@ var aBasicLevel = function(game){
 				}
 				fireball.isMovingObject = true;
 
+				fireball.bounces = 0;
+
 				fireball.update = function(){
 					fireball.position.x +=1;
 
 					if(!fireball.isFalling){
 						fireball.momentum.y = -3;
-						fireball.position.y -= .1;
+						fireball.position.y -= 0.1;
+						fireball.bounces++;
 					}
 
 					fireball.getIntersectingObjects()
-						.filter(function(object){return object instanceof Enemy})
+						.filter(function(object){return })
 						.forEach(function(object){
-							object.die();
+							object instanceof Enemy && object.die();
 						});
 
-					if(fireball.isOffScreen()){
+					if(fireball.bounces > maxBounces || fireball.isOffScreen()){
 						fireball.die();
 					}
 				}
