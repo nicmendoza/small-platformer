@@ -332,10 +332,6 @@ function Pickup(game,options){
 
 Pickup.prototype = new Item();
 
-Pickup.prototype.die = function(){
-	this.stage.garbage.push(this);
-}
-
 Item.prototype.getLeadingCorner = function(){
 
 	return {
@@ -450,10 +446,16 @@ Item.prototype.updateY = function(){
 
 Item.prototype.turnAround = function(){
 	this.direction = this.direction === 'left' ? 'right' : 'left';
-}
+};
 
 Item.prototype.isOffScreen = function(){
-	//
+	if(this.position.y > this.game.height){
+		return true;
+	}
+};
+
+Item.prototype.die = function(){
+	this.stage.garbage.push(this);
 }
 
 /*
@@ -561,9 +563,8 @@ function Stage(game,relativeMovementRatio,initialObjects,update){
 	self.update = function(player){
 		originalUpdate(player);
 		self.garbage.forEach(function(object){
-			console.log(
-				self.objects.splice(self.objects.indexOf(object),1)
-			);
+			self.objects.splice(self.objects.indexOf(object),1);
+
 		});
 		self.garbage = [];	
 	};
@@ -744,10 +745,9 @@ var aBasicLevel = function(game){
 							object.die();
 						});
 
-					// if is off-screen, remove
-
-					// if is intersecting enemies, kill them,
-					// destroy self
+					if(fireball.isOffScreen()){
+						fireball.die();
+					}
 				}
 
 				fireball.drawTransformations = function(ctx){
@@ -851,15 +851,15 @@ var aBasicLevel = function(game){
 	});
 
 
-	// new Array(35).join(',|').split(',').forEach(function(object,i){
-	// 	game.stages[0].addObject(new Enemy({
-	// 		position: {
-	// 			x: 0 + (i * 70),
-	// 			y: game.height - 80 - (i*25)
-	// 		}
+	new Array(35).join(',|').split(',').forEach(function(object,i){
+		game.stages[0].addObject(new Enemy({
+			position: {
+				x: 0 + (i * 70),
+				y: game.height - 80 - (i*25)
+			}
 			
-	// 	},game));
-	// });
+		},game));
+	});
 
 	game.stages.push(new Stage(game,1/5,[],game.camera.playerStageFollowing));
 
