@@ -33,61 +33,26 @@ function Game(canvas,levelInstance){
 	self.stages = [
 		new Stage(3000,1,[],function(player){
 
-			var playerPositionX = player.stage.getRenderPosition(player).x,
-				activeZoneWidth = 200;
-
-			// OPTION: player-centered camera
-			this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
-
-			// OPTION: player-following camera
-			// if(playerPositionX < activeZoneWidth){
-				
-			// 	this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
-			// } else if(playerPositionX > self.width - activeZoneWidth ) {
-			// 	this.position.x += (self.width-activeZoneWidth - playerPositionX);
-			// };
-			
-		}), new Stage(2000,1/3,[], function(player){
-
 			var playerPositionX = this.getRenderPosition(player).x,
 				activeZoneWidth = 200;
 
-			// OPTION: player-centered camera
-			this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
+				//console.log(playerPositionX)
 
-			// // OPTION: player-following camera
-			// if(playerPositionX < activeZoneWidth){
+			// OPTION: player-centered camera
+			//this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
+
+			// OPTION: player-following camera
+			if(playerPositionX < activeZoneWidth){
 				
-			// 	this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX);
-			// } else if(playerPositionX > self.width - activeZoneWidth ) {
-			// 	this.position.x += (self.width-activeZoneWidth - playerPositionX);
-			// };
+				this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
+			} else if(playerPositionX > self.width - activeZoneWidth ) {
+				this.position.x += (self.width-activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
+			};
 			
 		})
 	];
 
 	self.mainStage = self.stages[0];
-
-	//cloud test
-	self.stages[1].addObject(new Platform({
-			position: {
-				x: 100,
-				y: 50
-			},
-			color: '#EFEFEF',
-			width: 400,
-			height: 100
-		},self));
-
-	self.stages[1].addObject(new Platform({
-			position: {
-				x: 2200,
-				y: 70
-			},
-			color: '#EFEFEF',
-			width: 300,
-			height: 90
-		},self));
 
 	// configre HUD
 
@@ -763,15 +728,15 @@ var aBasicLevel = function(){
 	});
 
 
-	new Array(35).join(',|').split(',').forEach(function(object,i){
-		self.stages[0].addObject(new Enemy({
-			position: {
-				x: 0 + (i * 70),
-				y: self.height - 80 - (i*25)
-			}
+	// new Array(35).join(',|').split(',').forEach(function(object,i){
+	// 	self.stages[0].addObject(new Enemy({
+	// 		position: {
+	// 			x: 0 + (i * 70),
+	// 			y: self.height - 80 - (i*25)
+	// 		}
 			
-		},self));
-	});
+	// 	},self));
+	// });
 
 
 };
