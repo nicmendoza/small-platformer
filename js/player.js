@@ -62,21 +62,21 @@ Player.prototype.update = function(){
 	self.lastPosition.x = self.position.x;
 	self.lastPosition.y = self.position.y;
 
-	// face left if we need to
-	if(self.game.inputs.isDown('LEFT')){
+	// accelerate left
+	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')){
 		self.direction = 'left';
-		self.momentum.x = -(self.maxMovementSpeed);
+		self.momentum.x = -( Math.min( Math.abs(self.momentum.x)+ .2, self.maxMovementSpeed ) );
 	}
 
-	// face right if we need to
-	if(self.game.inputs.isDown('RIGHT')){
+	// accelerate right
+	if(self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
 		self.direction = 'right';
-		self.momentum.x = self.maxMovementSpeed;
+		self.momentum.x = Math.min( Math.abs(self.momentum.x)+ .2, self.maxMovementSpeed );
 	}
 
-	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT') || self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
-	} else {
-		self.momentum.x = 0;
+	// if player holding neither or both LEFT/RIGHT, slow down
+	if( ( !self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')  ) ||  ( self.game.inputs.isDown('LEFT') && self.game.inputs.isDown('RIGHT')  )  ){
+		self.momentum.x = (self.momentum.x < 0 ? -1 : 1 ) * Math.max(0,Math.abs(self.momentum.x)-.2);
 	}
 
 	if( self.game.inputs.isDown('FIRE') ) {
@@ -95,11 +95,9 @@ Player.prototype.update = function(){
 
 	self.updateCrouching(self.game.inputs.isDown('DOWN'));
 
-
-
 	self.updateX();
 	self.updateY();
-}
+};
 
 Player.prototype.draw = function(ctx){
 	var self = this,
@@ -147,11 +145,11 @@ Player.prototype.getPickup = function(object){
 
 Player.prototype.losePickup = function(){
 	return this.pickups.pop();
-}
+};
 
 Player.prototype.usePickup = function(){
 	this.pickups[0] && this.pickups[0].use(this);
-}
+};
 
 
 Player.prototype.jump = function(){
