@@ -37,11 +37,12 @@ Player.prototype.update = function(){
 	if(intersectingObjects.length){
 
 		intersectingEnemies = intersectingObjects.filter(function(object){
-			return object instanceof Enemy;
+			return object instanceof Enemy && !object.isDead;
 		})
 			.forEach(function(enemy){
 
 				if(self.momentum.y > 0 && self.position.y + self.height - self.momentum.y <= enemy.position.y){
+					resources.get('audio/stomp.wav').play();
 					enemy.die();
 					self.momentum.y = -(self.momentum.y+1)
 				} else if(!enemy.isDead) {
@@ -54,6 +55,7 @@ Player.prototype.update = function(){
 		})
 			.forEach(function(pickup){
 				self.getPickup(pickup);
+				resources.get('audio/power-up.wav').play();
 				pickup.die();
 			});
 
@@ -116,7 +118,7 @@ Player.prototype.draw = function(ctx){
 // returns false if player survives
 Player.prototype.die = function(){
 	// some kind of animation
-
+	resources.get('audio/fall-into-lava.wav').play();
 	return !this.losePickup() && self.game.reset();
 
 	
@@ -156,4 +158,5 @@ Player.prototype.jump = function(){
 	var self = this;
 	this.position.y+=.1;
 	this.momentum.y = this.isCrouching ? -5 : -4;
+	resources.get('audio/jump.wav').play();
 };

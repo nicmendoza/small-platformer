@@ -19,3 +19,15 @@ Use W,S,D or LEFT, DOWN, RIGHT arrow keys to move, SPACE to jump, and SHIFT to u
 - todo: move enemy types/logic into config object or Enemy prototype
 - todo: path-following enemies
 - todo: move to requireJS for module-loading
+
+
+##Music and audio
+Unlicensed Mario sound effects only used temporarily as placeholders
+
+"Freddy's Menagerie" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 3.0
+http://creativecommons.org/licenses/by/3.0/
+
+"Pamgaea" Kevin MacLeod (incompetech.com) 
+Licensed under Creative Commons: By Attribution 3.0
+http://creativecommons.org/licenses/by/3.0/

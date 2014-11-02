@@ -189,5 +189,5 @@ Item.prototype.isAgainstWall = function(){
 };
 
 Item.prototype.die = function(){
-	this.stage.garbage.push(this);
+	return this.stage.garbage.push(this);
 };

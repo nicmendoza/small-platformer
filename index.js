@@ -39,7 +39,6 @@ var aBasicLevel = function(game){
 			onUse: function(player){
 
 
-
 				var now = new Date(),
 					fireDelay = 500,
 					maxBounces = 15,
@@ -112,7 +111,7 @@ var aBasicLevel = function(game){
 					fireball.getIntersectingObjects()
 						.forEach(function(object){
 							if( object instanceof Enemy ) {
-								object.die() && fireball.die();
+								object.die() && fireball.die() && resources.get('audio/stomp.wav').play();;
 							}
 						});
 
@@ -123,6 +122,8 @@ var aBasicLevel = function(game){
 				}
 
 				game.stages[0].addObject(fireball);
+
+				resources.get('audio/fireball.wav').play();
 
 			}
 		}),
@@ -284,10 +285,20 @@ var aBasicLevel = function(game){
 };
 
 resources.load([
-    'img/sprites.png'
+    'img/sprites.png',
+    'audio/fireball.wav',
+    'audio/coin.wav',
+    'audio/jump.wav',
+    'audio/power-up.wav',
+    'audio/stomp.wav',
+    'audio/fall-into-lava.wav',
+    'audio/music-pamgaea.mp3'
 ]);
 
 resources.onReady(function(){
+	resources.get('audio/music-pamgaea.mp3').volume = 0.3;
+	resources.get('audio/music-pamgaea.mp3').loop = true;
+	resources.get('audio/music-pamgaea.mp3').play();
 	window.game = new Game(document.getElementById('game'),aBasicLevel);
 });
 

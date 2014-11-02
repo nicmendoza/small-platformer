@@ -5,32 +5,60 @@
     var readyCallbacks = [];
 
     // Load an image url or an array of image urls
-    function load(urlOrArr) {
+    function load(urlOrArr,type) {
         if(urlOrArr instanceof Array) {
             urlOrArr.forEach(function(url) {
-                _load(url);
+                _load(url,type);
             });
         }
         else {
-            _load(urlOrArr);
+            _load(urlOrArr,type);
         }
     }
 
-    function _load(url) {
+    function _load(url,type) {
+
+
+        var resource;
+
+        type = type || matchFileType(url);
+
         if(resourceCache[url]) {
             return resourceCache[url];
         }
         else {
-            var img = new Image();
-            img.onload = function() {
-                resourceCache[url] = img;
-                
-                if(isReady()) {
-                    readyCallbacks.forEach(function(func) { func(); });
-                }
-            };
-            resourceCache[url] = false;
-            img.src = url;
+
+            switch(type) {
+                case 'audio': 
+                    resource = new Audio(url);
+                    resourceCache[url] = resource;
+                    break;
+                case 'image':
+                default:
+                    resource = new Image();
+                    
+                    resourceCache[url] = false;
+                    
+                    resource.onload = function() {
+                        resourceCache[url] = resource;
+                        
+                        if(isReady()) {
+                            readyCallbacks.forEach(function(func) { func(); });
+                        }
+                    };
+
+                    resource.src = url;
+
+                    break;
+            }
+
+            if(isReady()) {
+                readyCallbacks.forEach(function(func) { func(); });
+            }
+
+           
+
+           
         }
     }
 
@@ -51,6 +79,12 @@
 
     function onReady(func) {
         readyCallbacks.push(func);
+    }
+
+    function matchFileType(url){
+        url = url.toLowerCase();
+        if(/\.(jpg|jpeg|png|gif|bmp)/.test(url)) return 'image';
+        if(/\.(wav|mp3)/.test(url)) return 'audio';
     }
 
     window.resources = { 
