@@ -21,6 +21,18 @@ var aBasicLevel = function(game){
 			},
 			label: 'Fireball',
 			color: 'red',
+			sprite: new Sprite({
+				position: {
+					x: 0,
+					y: 10
+				},
+				size: {
+					height: 10,
+					width: 10
+				},
+				url: 'img/sprites.png',
+				frames: [0]
+			}),
 			drawTransformations: function(ctx){
 				ctx.fillStyle = 'red';
 			},
@@ -43,6 +55,20 @@ var aBasicLevel = function(game){
 				fireball = new Item();
 
 				fireball.game = game;
+
+				fireball.sprite = new Sprite({
+					url: 'img/sprites.png',
+					position: {
+						x: 0,
+						y: 0
+					},
+					size: {
+						height: 10,
+						width: 10
+					},
+					speed: 10, // frames per second,
+					frames: [0,1,2,3,4,5]
+				});
 
 				fireball.width = 5;
 				fireball.height = 5;
@@ -252,9 +278,16 @@ var aBasicLevel = function(game){
 	});
 
 	// to test having player have pickup immediately;
-	//game.player.getPickup(game.stages[0].objects[7])
+	game.player.getPickup(game.stages[0].objects[7])
 
 
 };
 
-var game = new Game(document.getElementById('game'),aBasicLevel);
+resources.load([
+    'img/sprites.png'
+]);
+
+resources.onReady(function(){
+	window.game = new Game(document.getElementById('game'),aBasicLevel);
+});
+

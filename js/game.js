@@ -42,6 +42,9 @@ function Game(canvas,levelInit){
 			}
 
 			function drawHUDBox(x,y,size,pickup){
+
+				var spriteX,spriteY;
+
 				ctx.fillStyle = 'rgba(222,222,222,0.7)';
 				ctx.fillRect(x,y, size, size );
 				ctx.fillStyle = '#F9F9F9';
@@ -49,13 +52,25 @@ function Game(canvas,levelInit){
 
 				if(pickup){
 
-					pickup.drawTransformations(ctx);
+					
 
-					ctx.fillRect( x + gutter / 2, y + gutter / 2, size * 0.8, size * 0.8 );
+					if(pickup.sprite){
 
-					ctx.font = '10px arial';
-					ctx.fillStyle = 'white';
-					ctx.fillText( pickup.label,x + ( size - ctx.measureText( pickup.label).width ) / 2 , y + ( size / 2 ) );
+						spriteX = x + ( size * 0.8 ) / 2;
+						spriteY = y + ( size * 0.8 ) / 2;
+
+						pickup.sprite.draw(ctx, {x: spriteX, y: spriteY}, game.timeSinceLastDraw);
+					} else {
+						pickup.drawTransformations(ctx);
+
+						ctx.fillRect( x + gutter / 2, y + gutter / 2, size * 0.8, size * 0.8 );
+
+						ctx.font = '10px arial';
+						ctx.fillStyle = 'white';
+						ctx.fillText( pickup.label,x + ( size - ctx.measureText( pickup.label).width ) / 2 , y + ( size / 2 ) );
+					}
+
+					
 				}
 			}
 
@@ -83,7 +98,11 @@ function Game(canvas,levelInit){
 
 Game.prototype.draw = function(){
 	var self = this,
+		now = new Date(), 
 		stage;
+
+	// delta Time in fractions of a second
+	self.timeSinceLastDraw = ( now - ( self.lastDrawTime || now - 1 ) ) / 1000;
 
 	self.ctx.save();
 	self.ctx.fillStyle = this.backgroundColor;
@@ -98,7 +117,7 @@ Game.prototype.draw = function(){
 
 		stage.objects.forEach(function(object){
 			self.ctx.save();
-			object.draw(self.ctx);
+			object.draw(self.ctx,self.timeSinceLastDraw);
 			self.ctx.restore();
 		});
 
@@ -115,6 +134,8 @@ Game.prototype.draw = function(){
 	}
 
 	self.HUD.draw(self.ctx);
+
+	self.lastDrawTime = now;
 	
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));

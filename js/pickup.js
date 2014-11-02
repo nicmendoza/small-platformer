@@ -8,6 +8,8 @@ function Pickup(game,options){
 	this.width = 10;
 	this.height = 10;
 
+	this.sprite = options.sprite;
+
 	this.drawTransformations = options.drawTransformations;
 }
 

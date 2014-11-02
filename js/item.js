@@ -32,7 +32,7 @@ Item.prototype.getIntersectingObjects = function(){
 	
 };
 
-Item.prototype.draw = function(ctx){
+Item.prototype.draw = function(ctx,timeSinceLastDraw){
 
 	this.update && this.update();
 	this.onUpdate && this.onUpdate();
@@ -45,7 +45,14 @@ Item.prototype.draw = function(ctx){
 	var position = this.stage.getRenderPosition(this);
 
 	this.drawTransformations && this.drawTransformations(ctx);
-	ctx.fillRect(position.x,position.y,this.width,this.height);
+
+	if(this.sprite){
+		this.sprite.draw(ctx,position,timeSinceLastDraw);
+	} else {
+		ctx.fillRect(position.x,position.y,this.width,this.height);
+	}
+
+	
 };
 
 Item.prototype.getLeadingCorner = function(){
