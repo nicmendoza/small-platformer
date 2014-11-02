@@ -1,6 +1,9 @@
 An attempt at a platformer
 ==========================
 
+Instructions:
+Use W,S,D or LEFT, DOWN, UP arrow keys to move, SPACE to jump, and SHIFT to use pickups.
+
 [Try it](http://nicmendoza.github.io/small-platformer)
 
 todo: moving platforms
