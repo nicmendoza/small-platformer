@@ -2,11 +2,10 @@
 
 Trying to make a simple platformer engine/game along the lines of Mario
 
+[Try it](http://nicmendoza.github.io/small-platformer)
+
 ##Instructions:
 Use W,S,D or LEFT, DOWN, RIGHT arrow keys to move, SPACE to jump, and SHIFT to use pickups.
-
-##Try it
-[Demo here](http://nicmendoza.github.io/small-platformer)
 
 ##Ideas/To-Dos
 
