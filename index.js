@@ -298,7 +298,7 @@ resources.load([
 resources.onReady(function(){
 	resources.get('audio/music-pamgaea.mp3').volume = 0.3;
 	resources.get('audio/music-pamgaea.mp3').loop = true;
-	resources.get('audio/music-pamgaea.mp3').play();
+	//resources.get('audio/music-pamgaea.mp3').play();
 	window.game = new Game(document.getElementById('game'),aBasicLevel);
 });
 
