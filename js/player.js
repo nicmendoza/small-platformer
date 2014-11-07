@@ -5,6 +5,12 @@ function Player(position,game){
 
 	self.height = 10;
 	self.width = 10;
+
+	self.baseSize = {
+		height: self.height,
+		width: self.width
+	};
+
 	self.maxMovementSpeed = 2;
 	self.jumpSpeed = 3;
 	self.currentMovementSpeed = self.maxMovementSpeed;
@@ -32,7 +38,7 @@ Player.prototype = new Item();
 Player.prototype.update = function(){
 	var self = this,
 		intersectingObjects = self.getIntersectingObjects(),
-		intersectingEnemies, intersectingPickups;
+		intersectingEnemies, intersectingPickups,bounce;
 
 	if(intersectingObjects.length){
 
@@ -44,7 +50,7 @@ Player.prototype.update = function(){
 				if(self.momentum.y > 0 && self.position.y + self.height - self.momentum.y <= enemy.position.y){
 					resources.get('audio/stomp.wav').play();
 					enemy.die();
-					self.momentum.y = -(self.momentum.y+1)
+					bounce = true;
 				} else if(!enemy.isDead) {
 					self.die() || enemy.die();
 				}
@@ -59,6 +65,10 @@ Player.prototype.update = function(){
 				pickup.die();
 			});
 
+	}
+
+	if(bounce){
+		self.momentum.y = -(self.momentum.y+1);
 	}
 
 	self.lastPosition.x = self.position.x;
@@ -125,18 +135,19 @@ Player.prototype.die = function(){
 };
 
 Player.prototype.updateCrouching = function(wantsToCrouch){
-	var self = this;
+	var self = this,
+		crouchDiff = Math.ceil( self.baseSize.height * 0.4 );
 
 	if(self.isCrouching && !wantsToCrouch){
-		self.height = 10;
-		self.position.y -= 4;
+		self.height = self.baseSize.height;
+		self.position.y -= crouchDiff;
 		self.isCrouching = false;
 	};
 
 	
 	if(wantsToCrouch && !self.isFalling && !self.isCrouching){
-		self.position.y += 4;
-		self.height = 6;
+		self.position.y += crouchDiff;
+		self.height = self.baseSize.height - crouchDiff;
 		self.isCrouching = true;
 	}
 };
