@@ -176,17 +176,48 @@ Game.prototype.camera = {
 function KeyboardListener(){
 	var self = this,
 		down = {},
-			keys = {
+		keys = {
 			'LEFT': 	[37,65], // left arrow, a
 			'UP' : 		38,
 			'RIGHT': 	[39,68], // right arrow, d
 			'DOWN': 	[40,83],
-			'SPACE': 	32,
+			'SPACE': 	[32,['buttons',2]],
 			'FIRE': 	16 // shift key
-		};
+		},
+		controllerMapping = {
+			'SPACE': ['buttons',2],
+			'LEFT': ['axes',[0,-1]],
+			'RIGHT' : ['axes', [0,1]],
+			'UP' : ['axes', [1,-1]],
+			'DOWN': ['axes', [1,1]],
+			'FIRE': ['buttons', 3]
+		},
+		controllers = {};
+
+	window.controllers = controllers;
 
 	self.isDown = function(keyName){
-		return keys[keyName].length ? keys[keyName].some(function(keyCode){ return down[keyCode]; }) : down[keys[keyName]];
+
+		var keyPressed = keys[keyName].length ? ( keys[keyName].some(function(keyCode){ return down[keyCode]; }) || controllerButtonPressed ) : down[keys[keyName]],
+			controllerButtonPressed,mapping;
+
+		if(self.controller && controllerMapping[ keyName ]){
+
+			
+			mapping = controllerMapping[ keyName ];
+
+			if( mapping[0] === 'axes'  ){
+				// axis
+				controllerButtonPressed = self.controller[ mapping[0] ][ mapping[1][0] ] === mapping[1][1];
+			} else if( mapping[0] === 'buttons') {
+				// button
+				controllerButtonPressed = self.controller[ mapping[0] ][ mapping[1] ].pressed;
+			}
+		}
+
+
+
+		return keyPressed || controllerButtonPressed;
 	};
 
 	document.addEventListener('keydown',function(e){
@@ -196,4 +227,33 @@ function KeyboardListener(){
 	document.addEventListener('keyup',function(e){
 		down[e.keyCode] = false;
 	});
+
+	if(window.GamepadEvent){
+		// if/when connected, add controller
+		window.addEventListener('gamepadconnected',addController);
+
+		// regardless, check for a controller every half second, because gamepadconnected is really only a one-time event
+		// var interval = setInterval(function(){
+		// 	[].slice.call(navigator.getGamepads()).forEach(function(gamepad){
+		// 		addController(gamepad);
+		// 		// one controller is all we need
+		// 		//clearInterval(interval);
+		// 	});
+		// },1000);
+
+		function addController(gamepad){
+			gamepad = gamepad instanceof Event ? gamepad.gamepad : gamepad;
+			controllers[gamepad.id] = gamepad;
+			self.controller = self.controller || gamepad;
+		}
+
+		
+	}
+
+
+
+
+
+	
+
 }
