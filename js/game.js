@@ -77,9 +77,11 @@ function Game(canvas,levelInit){
 		}
 	});
 		
-	// create initial level
-	self.currentLevel = levelInit;
-	self.setLevel(levelInit);
+	var levelLoader = new LevelLoader(game);
+
+	levelLoader.load(self, 'levels/first-level-01.svg', function(){
+		self.draw();
+	});
 
 	self.reset = function(){
 
@@ -92,7 +94,7 @@ function Game(canvas,levelInit){
 
 	self.inputs = new InputListener();
 
-	window.requestAnimationFrame(self.draw.bind(self));
+	
 
 }
 
@@ -148,6 +150,7 @@ Game.prototype.draw = function(){
 
 Game.prototype.setLevel = function(levelInit){
 	levelInit.call(this,this);
+	this.curentLevel = levelInit;
 };
 
 Game.prototype.resetLevel = function(){
@@ -166,8 +169,8 @@ Game.prototype.camera = {
 
 		if(playerPositionX < activeZoneWidth){
 			this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
-		} else if(playerPositionX > this.game.width - activeZoneWidth ) {
-			this.position.x += (this.game.width - activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
+		} else if(playerPositionX > this.width - activeZoneWidth ) {
+			this.position.x += (this.width - activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
 		};
 	},
 	playerStageFollowing: function(player){

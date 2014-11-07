@@ -1,8 +1,8 @@
-function Player(position,game){
+function Player(game,options){
 	var self = this;
 
 	self.game = game;
-
+	
 	self.height = 10;
 	self.width = 10;
 
@@ -20,12 +20,14 @@ function Player(position,game){
 	self.pickups = [];
 	self.maxPickups = 2;
 
-	self.stage = game.mainStage;
-
 	self.isFalling = false;
 	self.isCrouching = false;
 
-	self.position = position;
+	self.position = options.position || {
+		x: parseInt(options.x,10),
+		y: parseInt(options.y,10)
+	};
+
 	self.lastPosition = {};
 	self.momentum = {
 		x: 0,

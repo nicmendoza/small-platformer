@@ -6,14 +6,18 @@ function Stage(game,relativeMovementRatio,initialObjects,update){
 
 	self.game = game;
 
-	var originalUpdate = update.bind(self)
+	//this is really only used on the camera update call for now
+	self.width = game.width;
+	self.height = game.height;
+
+	var originalUpdate = update.bind(self);
 	self.update = function(player){
 		originalUpdate(player);
 		self.garbage.forEach(function(object){
 			self.objects.splice(self.objects.indexOf(object),1);
 
 		});
-		self.garbage = [];	
+		self.garbage = [];
 	};
 
 	self.relativeMovementRatio = relativeMovementRatio || 1;

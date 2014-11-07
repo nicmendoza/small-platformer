@@ -1,8 +1,11 @@
 
-function Enemy(options,game){
+function Enemy(game,options){
 
 	var self = this;
-	self.position = options.position;
+	self.position = options.position || {
+		x: options.x,
+		y: options.y
+	};
 	self.game = game;
 	self.width = 10;
 	self.height = 10;
