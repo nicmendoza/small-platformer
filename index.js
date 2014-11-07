@@ -41,7 +41,7 @@ var aBasicLevel = function(game){
 
 				var now = new Date(),
 					fireDelay = 500,
-					maxBounces = 15,
+					maxBounces = 3,
 					fireball;
 
 				// prevent rapid-fire

@@ -90,7 +90,7 @@ function Game(canvas,levelInit){
 		delete self.resetting;
 	};
 
-	self.inputs = new KeyboardListener();
+	self.inputs = new InputListener();
 
 	window.requestAnimationFrame(self.draw.bind(self));
 
@@ -136,6 +136,9 @@ Game.prototype.draw = function(){
 	self.HUD.draw(self.ctx);
 
 	self.lastDrawTime = now;
+
+	//force update of gamepad object
+	navigator.getGamepads();
 	
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));
@@ -173,7 +176,7 @@ Game.prototype.camera = {
 	}
 };
 
-function KeyboardListener(){
+function InputListener(){
 	var self = this,
 		down = {},
 		keys = {
@@ -194,15 +197,12 @@ function KeyboardListener(){
 		},
 		controllers = {};
 
-	window.controllers = controllers;
-
 	self.isDown = function(keyName){
 
 		var keyPressed = keys[keyName].length ? ( keys[keyName].some(function(keyCode){ return down[keyCode]; }) || controllerButtonPressed ) : down[keys[keyName]],
 			controllerButtonPressed,mapping;
 
 		if(self.controller && controllerMapping[ keyName ]){
-
 			
 			mapping = controllerMapping[ keyName ];
 
@@ -231,29 +231,29 @@ function KeyboardListener(){
 	if(window.GamepadEvent){
 		// if/when connected, add controller
 		window.addEventListener('gamepadconnected',addController);
+		window.addEventListener('gamepaddisconnected',removeController);
 
-		// regardless, check for a controller every half second, because gamepadconnected is really only a one-time event
-		// var interval = setInterval(function(){
-		// 	[].slice.call(navigator.getGamepads()).forEach(function(gamepad){
-		// 		addController(gamepad);
-		// 		// one controller is all we need
-		// 		//clearInterval(interval);
-		// 	});
-		// },1000);
-
-		function addController(gamepad){
-			gamepad = gamepad instanceof Event ? gamepad.gamepad : gamepad;
-			controllers[gamepad.id] = gamepad;
-			self.controller = self.controller || gamepad;
-		}
+		// for Chrome (for previously connected controllers)
+		var interval = setInterval(function(){
+			[].slice.call(navigator.getGamepads()).forEach(function(gamepad){
+				addController(gamepad);
+				// one controller is all we need
+				clearInterval(interval);
+			});
+		},1000);
 
 		
 	}
 
+	function addController(gamepadE){
+			gamepad = gamepadE instanceof Event ? gamepadE.gamepad : gamepadE;
+			gamepad && ( controllers[gamepad.id] = gamepad );
+			self.controller = self.controller || gamepad;
+		}
 
-
-
-
-	
+		function removeController(gamepadE){
+			gamepad = gamepadE instanceof Event ? gamepadE.gamepad : gamepadE;
+			delete controllers[gamepadEvent.gamepad.id];
+		}
 
 }
