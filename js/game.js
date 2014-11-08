@@ -79,9 +79,11 @@ function Game(canvas){
 		
 	var levelLoader = new LevelLoader(game);
 
-	levelLoader.load(self, 'levels/first-level-01.svg', function(){
-		self.draw();
-	});
+	self.load = function(level){
+		levelLoader.load(self, 'levels/level-01.svg', function(){
+			self.draw();
+		});
+	};
 
 	self.reset = function(){
 
