@@ -29,6 +29,13 @@ function Platform(game,options){
 		self.options.path = self.game.getAllEntities().filter(function(entity){
 			return entity instanceof Line && entity.options.id === self.options.path
 		})[0];
+
+		self.lastOffset = {};
+
+		self.push = function(object){
+			object.position.x+= self.lastOffset.x;
+			object.position.y+= self.lastOffset.y;
+		}
 	}
 
 }
@@ -36,8 +43,14 @@ function Platform(game,options){
 Platform.prototype = new Item();
 
 Platform.prototype.update = function(game){
-	var self = this;
+	var self = this,
+		newPosition;
 	if(!self.options.path)return;
-	self.position = self.options.path.getPosition(self,game.timeSinceLastDraw);
+	newPosition = self.options.path.getPosition(self,game.timeSinceLastDraw);
+
+	self.lastOffset.x = newPosition.x - this.position.x;
+	self.lastOffset.y = newPosition.y - this.position.y;
+
+	self.position = newPosition;
 
 };

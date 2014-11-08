@@ -158,6 +158,8 @@ Item.prototype.updateY = function(){
 			self.isFalling = false;
 		}
 
+		closestObject.push && closestObject.push(self);
+
 	} else {
 		self.momentum.y += 0.2;
 		// comment out to fly :)

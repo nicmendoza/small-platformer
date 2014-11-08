@@ -2,7 +2,6 @@
 <svg>
 	<stage distance="1" camera="center">
 
-		<player x="400" y="200" color="pink" />
 
 		<enemy x="90" y="350" type="jumping_jack" />
 
@@ -18,11 +17,14 @@
 
 		<platform x="700" y="260" width="160" height="20" color="green" isoneway="true" />
 
-		<line id="a-straight-path" x1="200" y1="200" x2="400" y2="250"/>
-		<platform x="300" y="200" width="160" height="20" color="green" isoneway="true" path="a-straight-path" speed="50" />
+		<line id="line-one" x1="400" y1="260" x2="400" y2="270"/>
+		<platform x="300" y="200" width="160" height="20" color="purple" isoneway="true" path="line-one" speed="10" />
 
-		<line id="a-crooked-line" x1="50" y1="330" x2="200" y2="330"/>
-		<platform width="160" height="20" color="green" isoneway="true" path="a-crooked-line" speed="50" />
+		<line id="line-two" x1="50" y1="340" x2="200" y2="340"/>
+		<platform width="160" height="20" color="green" isoneway="true" path="line-two" speed="50" />
+
+
+		<player x="400" y="200" color="pink" />
 
 
 	</stage>
