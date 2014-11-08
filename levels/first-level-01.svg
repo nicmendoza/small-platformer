@@ -2,12 +2,19 @@
 <svg>
 	<stage distance="1" camera="center">
 		<player x="400" y="200" />
-		<enemy x="90" y="350" />
+
+		<enemy x="90" y="350" type="jumping_jack" />
 		<platform x="0" y="380" width="200" height="20" color="red" />
+
 		<platform x="251" y="380" width="200" height="20" color="salmon" />
+
+		<enemy x="350" y="350" type="patrolling" patrol_distance="90" />
 		<platform x="350" y="340" width="200" height="20" color="salmon" isoneway="true" />
+
 		<platform x="500" y="300" width="200" height="20" color="steelblue" isoneway="true" />
+
 		<platform x="700" y="260" width="160" height="20" color="green" isoneway="true" />
+
 	</stage>
 	<stage distance="0.875">
 			<platform x="200" y="360" width="200" height="20" color="#DFABAB" />

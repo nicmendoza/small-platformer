@@ -10,6 +10,8 @@ function Enemy(game,options){
 	self.width = 10;
 	self.height = 10;
 
+	self.options = options;
+
 	self.maxMovementSpeed = 1;
 	self.currentMovementSpeed = self.maxMovementSpeed;
 
@@ -32,7 +34,12 @@ function Enemy(game,options){
 		ctx.fillStyle = 'orange';
 	};
 
-	options.onInit && options.onInit.call(self);
+	//if a type passed in, call the setup function in it
+	if(options.type){
+		self.types[options.type](self);
+	}
+
+	this.onInit && this.onInit.call(self);
 }
 
 Enemy.prototype = new Item();
@@ -48,3 +55,31 @@ Enemy.prototype.die = function(){
 	delete this.onUpdate;
 	return true;
 };
+
+Enemy.prototype.types = {
+
+	jumping_jack: function(entity){
+		entity.onUpdate = function(game){
+			if(!this.isFalling && Math.random() * 100 > 95 ){
+				this.momentum.y = -4
+				this.position.y+= 0.1;
+				this.momentum.x = -(this.momentum.x);
+			}
+		}
+	},
+	patrolling: function(entity){
+
+		entity.onInit = function(game){
+			// this is optional
+			this.patrolStartX = this.position.x;
+			this.momentum.x = 1;
+		};
+
+		entity.onUpdate = function(game){
+			if(Math.abs(this.patrolStartX - this.position.x) >= this.options.patrol_distance || this.isAgainstWall() ){
+				this.turnAround();
+			}
+		};
+
+	}
+}

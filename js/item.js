@@ -35,7 +35,7 @@ Item.prototype.getIntersectingObjects = function(){
 Item.prototype.draw = function(ctx,timeSinceLastDraw){
 
 	this.update && this.update();
-	this.onUpdate && this.onUpdate();
+	this.onUpdate && this.onUpdate(this.game);
 
 	if(this.isMovingObject){
 		this.updateY && this.updateY();
