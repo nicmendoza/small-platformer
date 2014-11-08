@@ -157,6 +157,10 @@ Game.prototype.resetLevel = function(){
 	this.setLevel(this.currentLevel);
 };
 
+Game.prototype.getAllEntities = function(){
+	return this.stages.reduce(function(accumulator,stage){ return accumulator.concat(stage.objects) },[]);
+};
+
 function InputListener(){
 	var self = this,
 		down = {},

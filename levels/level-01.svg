@@ -16,6 +16,15 @@
 
 		<platform x="700" y="260" width="160" height="20" color="green" isoneway="true" />
 
+
+
+		<!-- <line id="a-straight-path" x1="200" y1="200" x2="400" y2="200"/>
+		<platform x="300" y="200" width="160" height="20" color="green" isoneway="true" path="a-straight-path" speed="50" /> -->
+
+		<line id="a-crooked-line" x1="200" y1="100" x2="250" y2="330"/>
+		<platform x="300" y="200" width="160" height="20" color="green" isoneway="true" path="a-crooked-line" speed="50" />
+
+
 	</stage>
 	<stage distance="0.875">
 			<platform x="200" y="360" width="200" height="20" color="#DFABAB" />
