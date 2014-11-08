@@ -96,7 +96,7 @@ Player.prototype.update = function(){
 	}
 
 	if( self.game.inputs.isDown('FIRE') ) {
-		self.usePickup();
+		self.usePickup(self.game,self);
 	}
 
 	//jump if we need to
