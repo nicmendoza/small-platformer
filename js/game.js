@@ -87,7 +87,7 @@ function Game(canvas){
 
 		self.stages = [];
 
-		self.setLevel(levelInit);
+		self.setLevel(game.curentLevel);
 		self.deaths++;
 		delete self.resetting;
 	};
