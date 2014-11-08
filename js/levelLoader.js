@@ -38,7 +38,7 @@ function LevelLoader(game){
 	function domElementsToEntities(domElementsArray){
 		return [].slice.call(domElementsArray).map(function(domElement){
 
-			var constructor = domElement.getAttribute('game:entity'),
+			var constructor = domElement.tagName.charAt(0).toUpperCase() + domElement.tagName.slice(1),
 				options = [].slice.call(domElement.attributes).reduce(function(accumulator, curr, i, arr) {
 					var asNum = parseInt(curr.value,10),
 						val = isNaN(asNum) ? curr.value : asNum;

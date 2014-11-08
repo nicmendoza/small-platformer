@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg>
-	<rect x="400" y="200"  width="10" height="10" game:entity="Player" />
-	<!--<rect x="45" y="350"  width="10" height="10" game:entity="Player" />-->
-	<rect x="90" y="350"  width="10" height="10" game:entity="Enemy" />
-	<rect x="0" y="380" width="200" height="20" color="red" game:entity="Platform" />
-	<rect x="251" y="380" width="200" height="20" color="salmon" game:entity="Platform" />
-	<rect x="350" y="340" width="200" height="20" color="salmon" game:entity="Platform" isoneway="true" />
-	<rect x="500" y="300" width="200" height="20" color="steelblue" game:entity="Platform" isoneway="true" />
-	<rect x="700" y="260" width="160" height="20" color="green" game:entity="Platform" isoneway="true" />
+	<player x="400" y="200" />
+	<enemy x="90" y="350" />
+	<platform x="0" y="380" width="200" height="20" color="red" />
+	<platform x="251" y="380" width="200" height="20" color="salmon" />
+	<platform x="350" y="340" width="200" height="20" color="salmon" isoneway="true" />
+	<platform x="500" y="300" width="200" height="20" color="steelblue" isoneway="true" />
+	<platform x="700" y="260" width="160" height="20" color="green" isoneway="true" />
 </svg>
