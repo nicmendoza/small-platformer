@@ -157,28 +157,6 @@ Game.prototype.resetLevel = function(){
 	this.setLevel(this.currentLevel);
 };
 
-Game.prototype.camera = {
-	playerFollowing: function(player){
-		this.position.x = Math.min(0,-( player.position.x - self.width / 2 ));
-	},
-	playerNudging: function(player){
-
-		var activeZoneWidth = 200,
-			// get player's drawn location
-			playerPositionX = this.getRenderPosition(player).x;
-
-		if(playerPositionX < activeZoneWidth){
-			this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
-		} else if(playerPositionX > this.width - activeZoneWidth ) {
-			this.position.x += (this.width - activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
-		};
-	},
-	playerStageFollowing: function(player){
-		this.position.x = player.stage.position.x;
-		this.position.y = player.stage.position.y
-	}
-};
-
 function InputListener(){
 	var self = this,
 		down = {},

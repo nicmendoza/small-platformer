@@ -10,46 +10,49 @@ function LevelLoader(game){
 			var el = document.createElement('div');
 			el.innerHTML = resp;
 
-			game.setLevel( self.createLevel(domElementsToEntities( el.children[0].querySelectorAll('*') ) ) );
+			game.setLevel( self.createLevel( el.children[0].querySelectorAll('stage') ) );
 			
 			typeof callback === 'function' && callback();
 		});
 	};
 
-	LevelLoader.prototype.createLevel = function(entities){
+	LevelLoader.prototype.createLevel = function(stages){
 		return function(game){
 
-			game.player = entities.filter(function(entity){
-				return entity instanceof Player;
-			})[0];
+			var player;
 
-			game.stages.push(
-				new Stage(game,1,[],game.camera.playerNudging)
-			);
+			[].slice.call(stages).forEach(function(stageElement,i){
 
-			entities.forEach(function(entity){
-				game.stages[0].addObject(entity);
+				var stage = domElementToEntity(stageElement);
+
+				game.stages.push(stage);
+
+				[].slice.call(stageElement.children).map(function(domElement){
+					var newObj = domElementToEntity(domElement);
+					game.stages[i].addObject( newObj );
+
+					if(newObj instanceof Player){
+						game.player = newObj;
+					}
+				});
+
 			});
+
 
 		};
 	};
 
+	function domElementToEntity(domElement){
+		var constructor = domElement.tagName.charAt(0).toUpperCase() + domElement.tagName.slice(1),
+			options = [].slice.call(domElement.attributes).reduce(function(accumulator, curr, i, arr) {
+				var asNum = parseFloat(curr.value,10),
+					val = isNaN(asNum) ? curr.value : asNum;
 
-	function domElementsToEntities(domElementsArray){
-		return [].slice.call(domElementsArray).map(function(domElement){
+				accumulator[curr.name] = val;
+				return accumulator;
+			}, {});
 
-			var constructor = domElement.tagName.charAt(0).toUpperCase() + domElement.tagName.slice(1),
-				options = [].slice.call(domElement.attributes).reduce(function(accumulator, curr, i, arr) {
-					var asNum = parseInt(curr.value,10),
-						val = isNaN(asNum) ? curr.value : asNum;
-
-					accumulator[curr.name] = val;
-					return accumulator;
-				}, {});
-
-			return new window[constructor](game,options);
-
-		});
+		return new window[constructor](game,options);
 	}
 
 })();
