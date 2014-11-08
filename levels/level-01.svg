@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg>
 	<stage distance="1" camera="center">
-		<player x="400" y="200" />
+		<player x="400" y="200" color="#666" />
 
 		<enemy x="90" y="350" type="jumping_jack" />
 		<platform x="0" y="380" width="200" height="20" color="red" />

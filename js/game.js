@@ -114,8 +114,6 @@ Game.prototype.draw = function(){
 	self.ctx.fillRect(0,0,this.width,this.height);
 	self.ctx.restore();
 
-	this.ctx.fillStyle = 'black';
-
 	for(var i = self.stages.length  - 1; i >= 0; i--){
 		stage = self.stages[i];
 
