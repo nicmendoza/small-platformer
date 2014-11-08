@@ -1,4 +1,4 @@
-function Game(canvas,levelInit){
+function Game(canvas){
 	var self = this;
 
 	self.run = true;

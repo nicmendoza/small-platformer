@@ -5,6 +5,7 @@
 
 		<enemy x="90" y="350" type="jumping_jack" />
 		<platform x="0" y="380" width="200" height="20" color="red" />
+		<pickup x="100" y="370" type="fireball" />
 
 		<platform x="251" y="380" width="200" height="20" color="salmon" />
 
