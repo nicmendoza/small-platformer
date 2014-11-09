@@ -1,3 +1,5 @@
+var CIRCLE = Math.PI * 2;
+
 function Path(){
 	
 }
@@ -21,6 +23,12 @@ function Line(game,options){
 		y: options.y2
 	};
 
+	self.angle = Math.atan2(self.startPosition.y - self.endPosition.y, self.startPosition.x - self.endPosition.x);
+
+	self.totalDistance = Math.sqrt( Math.pow( self.endPosition.x - self.startPosition.x, 2 ) + Math.pow( self.endPosition.y - self.startPosition.y , 2 ) );
+	//todo: move this to platform, rather than path segment
+	self.traversalTime = self.totalDistance / self.options.speed;
+
 	self.moveX = self.endPosition.x !== self.startPosition.x;
 	self.moveY = self.endPosition.y !== self.startPosition.y;
 
@@ -34,50 +42,66 @@ function Line(game,options){
 
 }
 
-Line.prototype.getPosition = function(entity,timeElapsed){
+Line.prototype.projectPosition = function(entity,secondsElapsed){
 	var self = this,
-		newPosition = {
-			x: entity.position.x,
-			y: entity.position.y
-		},
+		traversalTime = self.totalDistance / entity.options.speed, // seconds
+		distance = self.totalDistance * ( secondsElapsed / traversalTime ), // pixels
+		angle = entity.direction === 'backward' ? self.angle : ( self.angle + Math.PI ), // radians
 		now = new Date(),
-		remainingX,
-		remainingY,
-		travelX,
-		travelY;
-
+		timeElapsed = now - entity.legStartTime;
 
 	if(!entity.legStartTime){
-		newPosition.x = self.startPosition.x;
-		newPosition.y = self.startPosition.y;
+		entity.position = self.startPosition;
 		entity.direction = 'forward';
 		entity.legStartTime = now;
+		entity.travelDistance = 0;
+		return self.startPosition;
+
 	} else {
+		if( entity.travelDistance  >= self.totalDistance ){self.turnEntity(entity);}
 
+		entity.travelDistance += distance;
 
-		if(self.moveX){
-			remainingX = Math.abs( self[ entity.direction === 'forward' ? 'endPosition' : 'startPosition' ].x - entity.position.x );
-			travelX = Math.min( entity.options.speed * timeElapsed, remainingX);
-			newPosition.x += ( entity.direction === 'forward' ? 1 : -1 ) * self.xDefaultDirection * travelX;
+		return {
+			x: entity.position.x + distance * Math.cos(angle),
+			y: entity.position.y + distance * Math.sin(angle)
 		}
-
-		if(self.moveY){
-			remainingY = Math.abs( self[ entity.direction === 'forward' ? 'endPosition' : 'startPosition' ].y - entity.position.y );
-			travelY = Math.min( entity.options.speed * timeElapsed, remainingY);
-			newPosition.y += ( entity.direction === 'forward' ? 1 : -1 ) * self.yDefaultDirection * travelY;
-		}
-
-		if(entity.position.x === self.endPosition.x && entity.position.y === self.endPosition.y){
-			entity.direction = 'backward';
-			entity.legStartTime = now;
-		} else if(entity.position.x === self.startPosition.x && entity.position.y === self.startPosition.y){
-			entity.direction = 'forward';
-			entity.legStartTime = now;
-		}
-
 	}
-	
-	return newPosition;
+}
+
+Line.prototype.turnEntity = function(entity){
+	entity.direction = entity.direction === 'forward' ? 'backward' : 'forward';
+	entity.travelDistance = 0;
+	entity.legStartTime = new Date();
 };
 
-Line.prototype.draw = function(){};
+Line.prototype.draw = function(ctx){
+
+	var self = this,
+		renderStart, renderEnd;
+
+
+	if(self.options.draw){
+		
+		renderStart = self.stage.getRenderPosition({
+			position: {
+				x: self.startPosition.x,
+				y: self.startPosition.y
+			}
+		});
+
+		renderEnd = self.stage.getRenderPosition({
+			position: {
+				x: self.endPosition.x,
+				y: self.endPosition.y
+			}
+		});
+
+		ctx.strokeStyle = 'black';
+		ctx.beginPath();
+
+		ctx.moveTo(renderStart.x,renderStart.y);
+		ctx.lineTo(renderEnd.x,renderEnd.y);
+		ctx.stroke();
+	}
+};

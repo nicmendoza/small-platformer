@@ -26,7 +26,7 @@ function Platform(game,options){
 
 	if(self.options.path){
 		self.direction = 'forward';
-		self.options.path = self.game.getAllEntities().filter(function(entity){
+		self.path = self.game.getAllEntities().filter(function(entity){
 			return entity instanceof Line && entity.options.id === self.options.path
 		})[0];
 
@@ -45,12 +45,19 @@ Platform.prototype = new Item();
 Platform.prototype.update = function(game){
 	var self = this,
 		newPosition;
-	if(!self.options.path)return;
-	newPosition = self.options.path.getPosition(self,game.timeSinceLastDraw);
+	if(self.options.path) {
 
-	self.lastOffset.x = newPosition.x - this.position.x;
-	self.lastOffset.y = newPosition.y - this.position.y;
+		//console.log(self.path.projectPosition(self,game.timeSinceLastDraw));
+		newPosition = self.path.projectPosition(self, game.timeSinceLastDraw);
 
-	self.position = newPosition;
+		self.lastOffset.x = newPosition.x - this.position.x;
+		self.lastOffset.y = newPosition.y - this.position.y;
+
+		//console.log(newPosition.y);
+
+		self.position = newPosition;
+
+	}
+	
 
 };

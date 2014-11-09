@@ -29,6 +29,7 @@ function LevelLoader(game){
 
 				[].slice.call(stageElement.children).map(function(domElement){
 					var newObj = domElementToEntity(domElement);
+					newObj.stage = game.stages[i];
 					game.stages[i].addObject( newObj );
 
 					if(newObj instanceof Player){

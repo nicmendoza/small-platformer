@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg>
-	<stage distance="1" camera="center">
+	<stage distance="1" camera="nudge">
 
 
 		<enemy x="90" y="350" type="jumping_jack" />
@@ -17,11 +17,11 @@
 
 		<platform x="700" y="260" width="160" height="20" color="green" isoneway="true" />
 
-		<line id="line-one" x1="400" y1="260" x2="400" y2="270"/>
+		<line id="line-one" x1="380" y1="200" x2="400" y2="300" />
 		<platform x="300" y="200" width="160" height="20" color="purple" isoneway="true" path="line-one" speed="10" />
 
-		<line id="line-two" x1="50" y1="340" x2="200" y2="340"/>
-		<platform width="160" height="20" color="green" isoneway="true" path="line-two" speed="50" />
+		<!-- <line id="line-two" x1="50" y1="340" x2="200" y2="340"/>
+		<platform width="160" height="20" color="green" isoneway="true" path="line-two" speed="50" /> -->
 
 
 		<player x="400" y="200" color="pink" />
