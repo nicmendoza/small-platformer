@@ -11,14 +11,13 @@ Use W,S,D or LEFT, DOWN, RIGHT arrow keys to move, SPACE to jump, and SHIFT to u
 
 - todo: moving platforms
 - todo: artwork (top edges for platforms, repeating textures)
-- todo: level design (and tooling) (svg?)
 - todo: ladders (?)
 - todo: wall jumping (?)
 - todo: figure out better way for objects to inherit methods
 - todo: try foreground objects (blurred?)
-- todo: move enemy types/logic into config object or Enemy prototype
 - todo: path-following enemies
 - todo: move to requireJS for module-loading
+- todo: look up quad trees for storing static level data
 
 
 ##Music and audio
