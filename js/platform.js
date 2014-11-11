@@ -33,6 +33,9 @@ function Platform(game,options){
 		self.lastOffset = {};
 
 		self.push = function(object){
+
+			//console.log('player pushed: ' + self.lastOffset.y);
+
 			object.position.x+= self.lastOffset.x;
 			object.position.y+= self.lastOffset.y;
 		}

@@ -116,15 +116,27 @@ Item.prototype.updateY = function(){
 		closestObject = self.stage.objects
 
 			.filter(function(object){
+
+				var selfX = Math.round( self.position.x  ),
+					selfY = Math.round( self.position.y ),
+					objectX = Math.round( object.position.x ),
+					objectY = Math.round( object.position.y );
+
+				//if(self instanceof Player && object.path){
+				//	if(!(selfY + self.height - 3 <= objectY)){
+				//		debugger;
+				//	}
+				//}
+
 					// object can block current item we're evaluating
 				return object.isObstacle && ( !(self instanceof Player) || ( object.isOneWay ? self.game.oneWaysEnabled : true ) )
 
 					// current item we're evaluating is over object
-					&& self.position.x + self.width > object.position.x
-					&& self.position.x < object.position.x + object.width
+					&& selfX + self.width > objectX
+					&& selfX < objectX + object.width
 
 					// current item we're evaluating is higher than top of object
-					&& self.position.y + self.height <= object.position.y
+					&& selfY + self.height - 1 <= objectY // -1 to deal with possible rounding errors
 
 					// current item we're evaluating was previously above object (not jumping through from bottom)
 					//&& self.position.y - self.momentum.y < object.position.y;
@@ -136,6 +148,8 @@ Item.prototype.updateY = function(){
 			})[0],
 		closestObjectNearestEdge = closestObject && closestObject.position.y,
 		isOnGround = Math.abs(self.position.y + self.height - closestObjectNearestEdge) < 1;
+
+		//console.log(closestObjectNearestEdge)
 
 	
 
@@ -157,7 +171,7 @@ Item.prototype.updateY = function(){
 			self.momentum.y = 0;
 			self.isFalling = false;
 		}
-
+		//closestObject.push && console.log('push!');
 		closestObject.push && closestObject.push(self);
 
 	} else {

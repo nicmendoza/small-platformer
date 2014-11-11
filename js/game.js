@@ -105,6 +105,8 @@ Game.prototype.draw = function(){
 		now = new Date(), 
 		stage;
 
+	//console.log('===========================');
+
 	// delta Time in fractions of a second
 	self.timeSinceLastDraw = ( now - ( self.lastDrawTime || now - 1 ) ) / 1000;
 

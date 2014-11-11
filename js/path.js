@@ -62,6 +62,8 @@ Line.prototype.projectPosition = function(entity,secondsElapsed){
 
 		entity.travelDistance += distance;
 
+		//console.log( 'platform moved: ' + entity.position.y + distance * Math.sin(angle) );
+
 		return {
 			x: entity.position.x + distance * Math.cos(angle),
 			y: entity.position.y + distance * Math.sin(angle)
@@ -70,6 +72,10 @@ Line.prototype.projectPosition = function(entity,secondsElapsed){
 }
 
 Line.prototype.turnEntity = function(entity){
+
+	//console.log('turn around', Math.ceil(this.position.y));
+
+
 	entity.direction = entity.direction === 'forward' ? 'backward' : 'forward';
 	entity.travelDistance = 0;
 	entity.legStartTime = new Date();
@@ -82,7 +88,7 @@ Line.prototype.draw = function(ctx){
 
 
 	if(self.options.draw){
-		
+
 		renderStart = self.stage.getRenderPosition({
 			position: {
 				x: self.startPosition.x,
