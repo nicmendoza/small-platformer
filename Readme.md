@@ -18,6 +18,7 @@ Use W,S,D or LEFT, DOWN, RIGHT arrow keys to move, SPACE to jump, and SHIFT to u
 - todo: path-following enemies
 - todo: move to requireJS for module-loading
 - todo: look up quad trees for storing static level data
+- todo: break out update and collision detection
 
 
 ##Music and audio
