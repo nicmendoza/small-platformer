@@ -7,6 +7,10 @@ function Game(canvas){
 	self.width = canvas.width;
 	this.backgroundColor = '#D7F8FC';
 
+	self.periodStart = new Date();
+	self.fps = 0;
+	self.frames = 0;
+
 	self.gravity = 10;
 	self.maxFallSpeed = 5;
 	self.oneWaysEnabled = true;
@@ -22,8 +26,16 @@ function Game(canvas){
 	// configure HUD
 	self.HUD.addHUDItem({
 		draw: function(ctx){
-			ctx.font = '14px arial'
+			ctx.font = '14px arial';
 			ctx.fillText('deaths: ' + self.deaths, 4,14);
+		}
+	});
+
+
+	self.HUD.addHUDItem({
+		draw: function(ctx){
+			ctx.font = '14px arial';
+			ctx.fillText('fps: ' + self.fps, 4,28);
 		}
 	});
 
@@ -143,6 +155,14 @@ Game.prototype.draw = function(){
 
 	//force update of gamepad object
 	navigator.getGamepads();
+
+	self.frames++;
+	if(now - self.periodStart >= 1000){
+		self.fps = self.frames;
+		self.periodStart = new Date();
+		self.frames = 0;
+	}
+
 	
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));
