@@ -143,13 +143,15 @@ Player.prototype.updateCrouching = function(wantsToCrouch){
 	var self = this,
 		crouchDiff = Math.ceil( self.baseSize.height * 0.4 );
 
+	// hack: not letting you come out of a crouch mid-air or mid-fall so you can't
+	// wedge yourself into objects
 	if(self.isCrouching && !wantsToCrouch && !self.isFalling){
 		self.height = self.baseSize.height;
 		if(self.isFalling){}
 		self.position.y -= crouchDiff;
 		self.isCrouching = false;
 	};
-	
+
 	if(wantsToCrouch && !self.isFalling && !self.isCrouching){
 		self.position.y += crouchDiff;
 		self.height = self.baseSize.height - crouchDiff;

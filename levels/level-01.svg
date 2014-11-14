@@ -18,18 +18,20 @@
 
 		<platform x="700" y="260" width="160" height="20" color="green" isoneway="true" />
 
-		<!-- <line id="line-one" x1="380" y1="220" x2="400" y2="300" />
-		<platform width="160" height="20" color="purple" isoneway="true" path="line-one" speed="20" /> -->
+		<line id="line-one" x1="380" y1="220" x2="400" y2="300" />
+		<platform width="160" height="20" color="purple" isoneway="true" path="line-one" speed="20" />
 
-		<!-- <line id="line-two" x1="50" y1="340" x2="200" y2="340"/>
-		<platform width="160" height="20" color="green" isoneway="true" path="line-two" speed="50" /> -->
+		<line id="line-two" x1="50" y1="340" x2="200" y2="340"/>
+		<platform width="160" height="20" color="green" isoneway="true" path="line-two" speed="50" />
 
 		<enemy x="440" y="360" type="jumping_jack" />
 		<player x="400" y="370" color="pink" />
 
 
 	</stage>
-	<!-- <stage distance="0.875">
-			<platform x="200" y="360" width="200" height="20" color="#DFABAB" />
-	</stage> -->
+	<stage distance="0.875">
+			<platform x="200" y="200" width="100" height="10" color="white" />
+			<platform x="220" y="210" width="60" height="10" color="white" />
+			<platform x="250" y="195" width="30" height="5" color="white" />
+	</stage>
 </svg>
