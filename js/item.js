@@ -32,14 +32,51 @@ Item.prototype.getIntersectingObjects = function(){
 	
 };
 
+Item.prototype.sides = function(){
+
+	var sides = {
+		current: {
+			top: Math.round( this.position.y ),
+			left: Math.round( this.position.x ),
+			right: Math.round( this.position.x ) + this.width,
+			bottom: Math.round( this.position.y ) + this.height
+		}
+	};
+
+	if(this.lastPosition){
+		sides.last =  {
+			top: Math.round( this.lastPosition.y ),
+			left: Math.round( this.lastPosition.x ),
+			right: Math.round( this.lastPosition.x ) + this.width,
+			bottom: Math.round( this.lastPosition.y ) + this.height
+		};
+	}
+
+	return sides;
+};
+
 Item.prototype.wasAbove = function(object){
-	return Math.round( this.lastPosition.y ) + this.height <= object.lastPosition ? Math.round(object.lastPosition.y) : Math.round( object.position.y );
+	var sides = this.sides(),
+		objectSides = object.sides();
+
+	return sides.last.bottom <= objectSides[objectSides.last ? 'last' : 'current'].top;
 };
 
 
 
 Item.prototype.wasBelow = function(object){
-	return this.lastPosition.y >= object.position.y + object.height;
+	var sides = this.sides(),
+		objectSides = object.sides();
+
+	return sides.top >= objectSides.bottom;
+};
+
+Item.prototype.isWithinLeftRightBounds = function(object){
+	var sides = this.sides(),
+		objectSides = object.sides();
+
+	return sides.current.right > objectSides.current.left
+		&& sides.current.left < objectSides.current.right;
 };
 
 Item.prototype.draw = function(ctx,timeSinceLastDraw){
@@ -85,7 +122,7 @@ Item.prototype.getLeadingCorner = function(position){
 		x: this.direction === 'left' ? position.x: position.x + this.width,
 		// if falling, bottom, else top
 		y: this.momentum.y > 0 ? position.y + this.height : position.y
-	}
+	};
 };
 
 
@@ -97,6 +134,7 @@ Item.prototype.checkCollisionsX = function(withControls){
 		intersectingItems
 			.filter(function(object){
 				return object.isObstacle
+					&& !object.isOneWay // one-ways don't affect x-collisions
 					&& self.position.y + self.height > object.position.y
 					&& self.position.y < object.position.y + object.height;
 			})
@@ -125,11 +163,12 @@ Item.prototype.checkCollisionsY = function(){
 		isOnGround, ground,
 		intersectingItems = self.getIntersectingObjects()
 			.filter(function(object){
-				return ( object.isObstacle && ( !(self instanceof Player) || ( object.isOneWay ? self.game.oneWaysEnabled : true ) ) || true )
-					&& self.momentum.y < 0 ? !object.isOneWay : true
-					&& self.position.x + self.width > object.position.x
-					&& self.position.x < object.position.x + object.width
-					&& self.momentum.y > 0 ? self.wasAbove(object) : self.wasBelow(object);
+				if(self instanceof Player && self.game.inputs.isDown('DOWN')){
+					//debugger;
+				}
+				return ( object.isObstacle && ( !(self instanceof Player) || ( object.isOneWay ? self.game.oneWaysEnabled : true ) ) )
+					&& ( object.isOneWay ? self.momentum.y > 0 : true )
+					&& ( self.momentum.y > 0 ? self.wasAbove(object) : self.wasBelow(object) );
 			})
 			.forEach(function(obj){
 
@@ -148,9 +187,7 @@ Item.prototype.checkCollisionsY = function(){
 						isOnGround = true;
 						ground = obj;
 					}
-				}
-
-				
+				}				
 
 				obj.push && obj.push(self);
 

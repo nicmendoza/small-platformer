@@ -72,8 +72,8 @@ Pickup.prototype.types = {
 					frames: [0,1,2,3,4,5]
 				});
 
-				fireball.width = 5;
-				fireball.height = 5;
+				fireball.width = 10;
+				fireball.height = 10;
 				fireball.position = {
 					x: player.position.x,
 					y: player.position.y
@@ -117,9 +117,9 @@ Pickup.prototype.types = {
 								object.die() && fireball.die() && resources.get('audio/stomp.wav').play();;
 							}
 						});
-
+						
 					// limit bounces
-					if(fireball.bounces > maxBounces || fireball.isOffScreen()){
+					if(fireball.bounces >= maxBounces || fireball.isOffScreen()){
 						fireball.die();
 					}
 				}
