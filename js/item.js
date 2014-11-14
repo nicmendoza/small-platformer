@@ -16,7 +16,7 @@ Item.prototype.getIntersectingObjects = function(){
 
 	return this.stage.objects.filter(function(item){
 
-		var itemSides = item.isObstacle && item.sides().current;
+		var itemSides = item.sides && item.sides().current;
 
 		return itemSides
 			&& item !== thisItem
