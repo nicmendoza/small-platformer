@@ -10,23 +10,20 @@ function Item(game, options){
 }
 
 Item.prototype.getIntersectingObjects = function(){
+
 	var thisItem = this,
-		thisLeft = this.position.x,
-		thisRight = thisLeft + this.width,
-		thisTop = this.position.y,
-		thisBottom = thisTop + this.height;
+		sides = this.sides().current;
 
 	return this.stage.objects.filter(function(item){
-		var itemLeft = item.position.x,
-			itemRight = itemLeft + item.width,
-			itemTop = item.position.y,
-			itemBottom = itemTop + item.height;
 
-		return item !== thisItem
-			&& thisRight >= itemLeft
-			&& thisLeft <= itemRight
-			&& thisTop <= itemBottom
-			&& thisBottom >= itemTop;
+		var itemSides = item.isObstacle && item.sides().current;
+
+		return itemSides
+			&& item !== thisItem
+			&& sides.right >= itemSides.left
+			&& sides.left <= itemSides.right
+			&& sides.top <= itemSides.bottom
+			&& sides.bottom >= itemSides.top;
 	});
 
 	
@@ -165,39 +162,49 @@ Item.prototype.checkCollisionsY = function(){
 		leadingCoord = self.getLeadingCorner(),
 		leadingYCoord = leadingCoord.y,
 		isOnGround, ground,
+		sides = self.sides(),
 		intersectingItems = self.getIntersectingObjects()
 			.filter(function(object){
 
-				if(typeof self.bounces !== 'undefined' && object.color === 'salmon'){
-					//debugger;
-				}
+				var objectSides = object.sides();
 
 				return ( object.isObstacle && ( !(self instanceof Player) || ( object.isOneWay ? self.game.oneWaysEnabled : true ) ) )
-					&& ( object.isOneWay ? self.momentum.y > 0 : true )
-					&& ( self.momentum.y > 0 ? self.wasAbove(object) : self.wasBelow(object) );
-			})
-			.forEach(function(obj){
-
-				var nearestEdge = self.momentum.y < 0 ? obj.position.y + obj.height : obj.position.y;
-
-				if(obj.canSupportPlayer){
-					if(self.momentum.y < 0){
-						self.position.y = nearestEdge;
-						self.momentum.y = 0;
-					} else if(self.momentum.y > 0){
-						self.position.y = self.lastPosition.y + Math.min( self.momentum.y, nearestEdge - leadingYCoord );
-						// wait to cancel out momentum until after bounce logic
-					}
-
-					if(self.position.y + self.height === nearestEdge){
-						isOnGround = true;
-						ground = obj;
-					}
-				}				
-
-				obj.push && obj.push(self);
-
+					&& ( object.isOneWay ? self.momentum.y >= 0 : true )
+					&& ( self.momentum.y >= 0 ? self.wasAbove(object) : self.wasBelow(object) );
 			});
+
+
+		intersectingItems.forEach(function(object){
+
+			var nearestEdge = self.momentum.y < 0 ? object.position.y + object.height : object.position.y;
+
+			if(object.canSupportPlayer){
+
+				// hit top
+				if(self.momentum.y < 0){
+
+					self.position.y = nearestEdge;
+					self.momentum.y = 0;
+
+				} else if(self.momentum.y > 0){
+
+					self.position.y = self.lastPosition.y + Math.min( self.momentum.y, nearestEdge - leadingYCoord );
+					// wait to cancel out momentum until after bounce logic
+				} else {
+					isOnGround = true;
+					ground - object;
+				}
+
+				if(self.position.y + self.height === nearestEdge){
+					isOnGround = true;
+					ground = object;
+				}
+			}
+
+			object.push && object.push(self);
+
+		});
+
 
 	if(isOnGround){
 

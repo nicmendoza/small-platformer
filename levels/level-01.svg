@@ -18,14 +18,14 @@
 
 		<platform x="700" y="260" width="160" height="20" color="green" isoneway="true" />
 
-		<line id="line-one" x1="380" y1="220" x2="400" y2="300" />
+		<line id="line-one" x1="320" y1="220" x2="360" y2="270" />
 		<platform width="160" height="20" color="purple" isoneway="true" path="line-one" speed="20" />
 
 		<line id="line-two" x1="50" y1="340" x2="200" y2="340"/>
 		<platform width="160" height="20" color="green" isoneway="true" path="line-two" speed="50" />
 
 		<enemy x="440" y="360" type="jumping_jack" />
-		<player x="400" y="370" color="pink" />
+		<player x="400" y="200" color="pink" />
 
 
 	</stage>

@@ -33,10 +33,9 @@ function Platform(game,options){
 		self.lastOffset = {};
 
 		self.push = function(object){
-
 			object.position.x+= self.lastOffset.x;
 			object.position.y+= self.lastOffset.y;
-		}
+		};
 	}
 
 }
