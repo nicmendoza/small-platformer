@@ -34,14 +34,6 @@ Item.prototype.getIntersectingObjects = function(){
 
 Item.prototype.draw = function(ctx,timeSinceLastDraw){
 
-	this.update && this.update(this.game);
-	this.onUpdate && this.onUpdate(this.game);
-
-	if(this.isMovingObject){
-		this.updateY && this.updateY();
-		this.updateX && this.updateX();
-	}
-
 	var position = this.stage.getRenderPosition(this);
 
 	this.drawTransformations && this.drawTransformations(ctx);
@@ -51,8 +43,20 @@ Item.prototype.draw = function(ctx,timeSinceLastDraw){
 	} else {
 		ctx.fillRect(position.x,position.y,this.width,this.height);
 	}
+};
 
-	
+Item.prototype.update = function(game){
+
+	this.onUpdate && this.onUpdate(game);
+
+	if(this.isMovingObject){
+		this.updateY && this.updateY();
+		this.updateX && this.updateX();
+	}
+};
+
+Item.prototype.checkCollisions = function(){
+	// 
 };
 
 Item.prototype.getLeadingCorner = function(){
@@ -122,13 +126,7 @@ Item.prototype.updateY = function(){
 					objectX = Math.round( object.position.x ),
 					objectY = Math.round( object.position.y );
 
-				//if(self instanceof Player && object.path){
-				//	if(!(selfY + self.height - 3 <= objectY)){
-				//		debugger;
-				//	}
-				//}
-
-					// object can block current item we're evaluating
+				// object can block current item we're evaluating
 				return object.isObstacle && ( !(self instanceof Player) || ( object.isOneWay ? self.game.oneWaysEnabled : true ) )
 
 					// current item we're evaluating is over object
@@ -148,8 +146,6 @@ Item.prototype.updateY = function(){
 			})[0],
 		closestObjectNearestEdge = closestObject && closestObject.position.y,
 		isOnGround = Math.abs(self.position.y + self.height - closestObjectNearestEdge) < 1;
-
-		//console.log(closestObjectNearestEdge)
 
 	
 
@@ -171,7 +167,6 @@ Item.prototype.updateY = function(){
 			self.momentum.y = 0;
 			self.isFalling = false;
 		}
-		//closestObject.push && console.log('push!');
 		closestObject.push && closestObject.push(self);
 
 	} else {

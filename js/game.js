@@ -117,8 +117,6 @@ Game.prototype.draw = function(){
 		now = new Date(), 
 		stage;
 
-	//console.log('===========================');
-
 	// delta Time in fractions of a second
 	self.timeSinceLastDraw = ( now - ( self.lastDrawTime || now - 1 ) ) / 1000;
 
@@ -130,6 +128,15 @@ Game.prototype.draw = function(){
 
 	for(var i = self.stages.length  - 1; i >= 0; i--){
 		stage = self.stages[i];
+
+		stage.objects.forEach(function(object){
+			object.update && object.update(self);
+			
+		});
+
+		stage.objects.forEach(function(object){
+			object.checkCollisions && object.checkCollisions();
+		});
 
 		stage.objects.forEach(function(object){
 			self.ctx.save();

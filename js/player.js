@@ -119,8 +119,6 @@ Player.prototype.draw = function(ctx){
 	var self = this,
 		position;
 
-	this.update();
-
 	// only close over these values AFTER player has updated
 	position = self.stage.getRenderPosition(self);
 
