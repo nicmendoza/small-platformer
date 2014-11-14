@@ -50,8 +50,7 @@ Player.prototype.update = function(){
 			return object instanceof Enemy && !object.isDead;
 		})
 			.forEach(function(enemy){
-
-				if(self.momentum.y > 0 && self.position.y + self.height - self.momentum.y <= enemy.position.y){
+				if(self.momentum.y > 0 && self.wasAbove(enemy)){
 					resources.get('audio/stomp.wav').play();
 					enemy.die();
 					bounce = true;
@@ -74,9 +73,6 @@ Player.prototype.update = function(){
 	if(bounce){
 		self.momentum.y = -(self.momentum.y+1);
 	}
-
-	self.lastPosition.x = self.position.x;
-	self.lastPosition.y = self.position.y;
 
 	// accelerate left
 	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')){
@@ -111,8 +107,14 @@ Player.prototype.update = function(){
 
 	self.updateCrouching(self.game.inputs.isDown('DOWN'));
 
-	self.updateX();
-	self.updateY();
+
+	self.lastPosition.x = self.position.x;
+	self.lastPosition.y = self.position.y;
+
+	self.position.x += self.momentum.x;
+	self.position.y += self.momentum.y;
+
+	
 };
 
 Player.prototype.draw = function(ctx){
@@ -170,7 +172,7 @@ Player.prototype.usePickup = function(){
 
 Player.prototype.jump = function(){
 	var self = this;
-	this.position.y+=.1;
+	this.position.y -=1;
 	this.momentum.y = this.isCrouching ? -5 : -4;
 	resources.get('audio/jump.wav').play();
 };

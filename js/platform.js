@@ -34,8 +34,6 @@ function Platform(game,options){
 
 		self.push = function(object){
 
-			//console.log('player pushed: ' + self.lastOffset.y);
-
 			object.position.x+= self.lastOffset.x;
 			object.position.y+= self.lastOffset.y;
 		}
@@ -48,16 +46,12 @@ Platform.prototype = new Item();
 Platform.prototype.update = function(game){
 	var self = this,
 		newPosition;
+
 	if(self.options.path) {
 
-		//console.log(self.path.projectPosition(self,game.timeSinceLastDraw));
 		newPosition = self.path.projectPosition(self, game.timeSinceLastDraw);
-
 		self.lastOffset.x = newPosition.x - this.position.x;
 		self.lastOffset.y = newPosition.y - this.position.y;
-
-		//console.log(newPosition.y);
-
 		self.position = newPosition;
 
 	}
