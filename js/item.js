@@ -68,7 +68,7 @@ Item.prototype.wasBelow = function(object){
 	var sides = this.sides(),
 		objectSides = object.sides();
 
-	return sides.top >= objectSides.bottom;
+	return sides.last.top >= objectSides[objectSides.last ? 'last' : 'current'].bottom;
 };
 
 Item.prototype.isWithinLeftRightBounds = function(object){
@@ -129,14 +129,18 @@ Item.prototype.getLeadingCorner = function(position){
 Item.prototype.checkCollisionsX = function(withControls){
 	var self = this,
 		leadingXCoord = self.getLeadingCorner()['x'],
-		intersectingItems = self.getIntersectingObjects();
+		intersectingItems = self.getIntersectingObjects(),
+		sides = self.sides();
 
 		intersectingItems
 			.filter(function(object){
+
+				var objectSides = object.sides();
+
 				return object.isObstacle
 					&& !object.isOneWay // one-ways don't affect x-collisions
-					&& self.position.y + self.height > object.position.y
-					&& self.position.y < object.position.y + object.height;
+					&& ( sides.current.bottom > objectSides.current.top )
+					&& ( sides.current.top < objectSides.current.bottom );
 			})
 			.forEach(function(obj){
 				var nearestEdge = self.direction === 'left' ? obj.position.x + obj.width : obj.position.x;
@@ -163,9 +167,11 @@ Item.prototype.checkCollisionsY = function(){
 		isOnGround, ground,
 		intersectingItems = self.getIntersectingObjects()
 			.filter(function(object){
-				if(self instanceof Player && self.game.inputs.isDown('DOWN')){
+
+				if(typeof self.bounces !== 'undefined' && object.color === 'salmon'){
 					//debugger;
 				}
+
 				return ( object.isObstacle && ( !(self instanceof Player) || ( object.isOneWay ? self.game.oneWaysEnabled : true ) ) )
 					&& ( object.isOneWay ? self.momentum.y > 0 : true )
 					&& ( self.momentum.y > 0 ? self.wasAbove(object) : self.wasBelow(object) );

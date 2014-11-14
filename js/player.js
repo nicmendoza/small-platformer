@@ -143,12 +143,12 @@ Player.prototype.updateCrouching = function(wantsToCrouch){
 	var self = this,
 		crouchDiff = Math.ceil( self.baseSize.height * 0.4 );
 
-	if(self.isCrouching && !wantsToCrouch){
+	if(self.isCrouching && !wantsToCrouch && !self.isFalling){
 		self.height = self.baseSize.height;
+		if(self.isFalling){}
 		self.position.y -= crouchDiff;
 		self.isCrouching = false;
 	};
-
 	
 	if(wantsToCrouch && !self.isFalling && !self.isCrouching){
 		self.position.y += crouchDiff;

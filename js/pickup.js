@@ -72,8 +72,8 @@ Pickup.prototype.types = {
 					frames: [0,1,2,3,4,5]
 				});
 
-				fireball.width = 10;
-				fireball.height = 10;
+				fireball.width = 8;
+				fireball.height = 8;
 				fireball.position = {
 					x: player.position.x,
 					y: player.position.y
@@ -82,7 +82,7 @@ Pickup.prototype.types = {
 
 				fireball.momentum = {
 					x: player.momentum.x * 1.2 || ( player.direction === 'left' ? -2 : 2),
-					y: 0
+					y: -3
 				}
 
 				fireball.direction = player.direction;
@@ -117,7 +117,7 @@ Pickup.prototype.types = {
 								object.die() && fireball.die() && resources.get('audio/stomp.wav').play();;
 							}
 						});
-						
+
 					// limit bounces
 					if(fireball.bounces >= maxBounces || fireball.isOffScreen()){
 						fireball.die();
