@@ -155,10 +155,21 @@ Item.prototype.checkCollisionsX = function(withControls){
 				return object.isObstacle
 					&& !object.isOneWay // one-ways don't affect x-collisions
 					&& ( sides.current.bottom > objectSides.current.top )
-					&& ( sides.current.top < objectSides.current.bottom );
+					&& ( sides.current.top < objectSides.current.bottom )
+					// don't get trapped if against obstacle!
+					&& ( self.direction === 'right' 
+						? ( sides.current.left <= objectSides.current.right ) 
+						: true )
+					&& ( self.direction === 'left' 
+						? ( sides.current.right >= objectSides.current.left ) 
+						: true );
 			})
 			.forEach(function(obj){
 				var nearestEdge = self.direction === 'left' ? obj.position.x + obj.width : obj.position.x;
+
+				if(self.position.x !== self.lastPosition.x){
+					//console.log('from ', self.lastPosition.x, ' to', self.position.x)
+				}
 
 				if(self.momentum.x < 0){
 					self.position.x = self.lastPosition.x + Math.max(self.momentum.x, nearestEdge - leadingXCoord);
