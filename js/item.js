@@ -12,11 +12,15 @@ function Item(game, options){
 Item.prototype.getIntersectingObjects = function(){
 
 	var thisItem = this,
-		sides = this.sides().current;
+		sides = this.theSides && this.theSides.current;
+
+	if(!sides){
+		return []
+	}
 
 	return this.stage.objects.filter(function(item){
 
-		var itemSides = item.sides && item.sides().current;
+		var itemSides = item.theSides && item.theSides.current;
 
 		return itemSides
 			&& item !== thisItem
@@ -25,7 +29,6 @@ Item.prototype.getIntersectingObjects = function(){
 			&& sides.top <= itemSides.bottom
 			&& sides.bottom >= itemSides.top;
 	});
-
 	
 };
 
@@ -53,27 +56,11 @@ Item.prototype.sides = function(){
 };
 
 Item.prototype.wasAbove = function(object){
-	var sides = this.sides(),
-		objectSides = object.sides();
-
-	return sides.last.bottom <= objectSides[objectSides.last ? 'last' : 'current'].top;
+	return this.theSides.last.bottom <= object.theSides[object.theSides.last ? 'last' : 'current'].top;
 };
-
-
 
 Item.prototype.wasBelow = function(object){
-	var sides = this.sides(),
-		objectSides = object.sides();
-
-	return sides.last.top >= objectSides[objectSides.last ? 'last' : 'current'].bottom;
-};
-
-Item.prototype.isWithinLeftRightBounds = function(object){
-	var sides = this.sides(),
-		objectSides = object.sides();
-
-	return sides.current.right > objectSides.current.left
-		&& sides.current.left < objectSides.current.right;
+	return this.theSides.last.top >= object.theSides[object.theSides.last ? 'last' : 'current'].bottom;
 };
 
 Item.prototype.draw = function(ctx,timeSinceLastDraw){
@@ -90,14 +77,40 @@ Item.prototype.draw = function(ctx,timeSinceLastDraw){
 };
 
 Item.prototype.update = function(game){
-	
-	this.onUpdate && this.onUpdate(game);
 
-	if(this.isMovingObject){
-		this.lastPosition.x = this.position.x;
-		this.lastPosition.y = this.position.y;
-		this.position.x += this.momentum.x;
-		this.position.y += this.momentum.y;
+	var self = this;
+	
+	self.onUpdate && self.onUpdate(game);
+
+	self.theSides = makeSides();
+
+	if(self.isMovingObject){
+		self.lastPosition.x = self.position.x;
+		self.lastPosition.y = self.position.y;
+		self.position.x += self.momentum.x;
+		self.position.y += self.momentum.y;
+	}
+
+	function makeSides(){
+		var sides = {
+			current: {
+				top: Math.floor( self.position.y ),
+				left: Math.floor( self.position.x ),
+				right: Math.floor( self.position.x ) + self.width,
+				bottom: Math.floor( self.position.y ) + self.height
+			}
+		};
+
+		if(self.lastPosition){
+			sides.last =  {
+				top: Math.floor( self.lastPosition.y ),
+				left: Math.floor( self.lastPosition.x ),
+				right: Math.floor( self.lastPosition.x ) + self.width,
+				bottom: Math.floor( self.lastPosition.y ) + self.height
+			};
+		}
+
+		return sides;
 	}
 
 	
@@ -127,12 +140,17 @@ Item.prototype.checkCollisionsX = function(withControls){
 	var self = this,
 		leadingXCoord = self.getLeadingCorner()['x'],
 		intersectingItems = self.getIntersectingObjects(),
+		//todo: figure out why these differ
 		sides = self.sides();
+
+		if(self instanceof Player && JSON.stringify(sides) !== JSON.stringify(self.theSides)){
+			//debugger;
+		}
 
 		intersectingItems
 			.filter(function(object){
 
-				var objectSides = object.sides();
+				var objectSides = object.theSides;
 
 				return object.isObstacle
 					&& !object.isOneWay // one-ways don't affect x-collisions
@@ -162,11 +180,11 @@ Item.prototype.checkCollisionsY = function(){
 		leadingCoord = self.getLeadingCorner(),
 		leadingYCoord = leadingCoord.y,
 		isOnGround, ground,
-		sides = self.sides(),
+		sides = self.theSides,
 		intersectingItems = self.getIntersectingObjects()
 			.filter(function(object){
 
-				var objectSides = object.sides();
+				var objectSides = object.theSides;
 
 				return ( object.isObstacle && ( !(self instanceof Player) || ( object.isOneWay ? self.game.oneWaysEnabled : true ) ) )
 					&& ( object.isOneWay ? self.momentum.y >= 0 : true )

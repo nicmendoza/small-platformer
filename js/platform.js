@@ -54,6 +54,8 @@ Platform.prototype.update = function(game){
 		self.position = newPosition;
 
 	}
+
+	Item.prototype.update.call(self);
 	
 
 };

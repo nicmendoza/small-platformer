@@ -107,13 +107,7 @@ Player.prototype.update = function(){
 
 	self.updateCrouching(self.game.inputs.isDown('DOWN'));
 
-
-	self.lastPosition.x = self.position.x;
-	self.lastPosition.y = self.position.y;
-
-	self.position.x += self.momentum.x;
-	self.position.y += self.momentum.y;
-
+	Item.prototype.update.call(self);
 	
 };
 
