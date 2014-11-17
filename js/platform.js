@@ -31,6 +31,8 @@ function Platform(game,options){
 	};
 
 	if(self.options.path){
+
+		self.isMovingObject = true;
 		self.direction = 'forward';
 		self.path = self.game.getAllEntities().filter(function(entity){
 			return entity instanceof Line && entity.options.id === self.options.path
@@ -39,8 +41,8 @@ function Platform(game,options){
 		self.lastOffset = {};
 
 		self.push = function(object){
-			object.position.x+= self.lastOffset.x;
-			object.position.y+= self.lastOffset.y;
+			object.position.x += self.lastOffset.x;
+			object.position.y += self.lastOffset.y;
 		};
 	}
 
@@ -50,14 +52,20 @@ Platform.prototype = new Item();
 
 Platform.prototype.update = function(game){
 	var self = this,
-		newPosition;
+		newPosition,isTurning;
 
 	if(self.options.path) {
 
 		newPosition = self.path.projectPosition(self, game.timeSinceLastDraw);
+		// works but currently unused
+		//isTurning = self.lastOffset ? !sameSign(self.lastOffset.y, newPosition.y - this.position.y) : false;
 		self.lastOffset.x = newPosition.x - this.position.x;
 		self.lastOffset.y = newPosition.y - this.position.y;
-		self.position = newPosition;
+
+		self.momentum = {
+			x: newPosition.x - this.position.x,
+			y: newPosition.y - this.position.y
+		};
 
 	}
 
@@ -65,3 +73,7 @@ Platform.prototype.update = function(game){
 	
 
 };
+// warning: doesn't work for -0
+function sameSign(a,b){
+	return ((a<0) === (b<0)); 
+}

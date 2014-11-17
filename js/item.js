@@ -197,7 +197,10 @@ Item.prototype.checkCollisionsY = function(intersectingItems){
 
 		intersectingItems.forEach(function(object){
 
-			var nearestEdge = self.momentum.y < 0 ? object.position.y + object.height : object.position.y;
+
+
+			var objectSides = object.theSides,
+				nearestEdge = self.momentum.y < 0 ? objectSides.current.bottom : objectSides.current.top;
 
 			if(object.canSupportPlayer){
 
