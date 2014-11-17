@@ -82,31 +82,32 @@ Item.prototype.update = function(game){
 	
 	self.onUpdate && self.onUpdate(game);
 
-	self.theSides = makeSides();
-
 	if(self.isMovingObject){
+		// store last position
 		self.lastPosition.x = self.position.x;
 		self.lastPosition.y = self.position.y;
+		// update position based on momentum
 		self.position.x += self.momentum.x;
 		self.position.y += self.momentum.y;
 	}
+		self.theSides = makeSides();
 
 	function makeSides(){
 		var sides = {
 			current: {
-				top: Math.floor( self.position.y ),
-				left: Math.floor( self.position.x ),
-				right: Math.floor( self.position.x ) + self.width,
-				bottom: Math.floor( self.position.y ) + self.height
+				top: Math.round( self.position.y ),
+				left: Math.round( self.position.x ),
+				right: Math.round( self.position.x ) + self.width,
+				bottom: Math.round( self.position.y ) + self.height
 			}
 		};
 
 		if(self.lastPosition){
 			sides.last =  {
-				top: Math.floor( self.lastPosition.y ),
-				left: Math.floor( self.lastPosition.x ),
-				right: Math.floor( self.lastPosition.x ) + self.width,
-				bottom: Math.floor( self.lastPosition.y ) + self.height
+				top: Math.round( self.lastPosition.y ),
+				left: Math.round( self.lastPosition.x ),
+				right: Math.round( self.lastPosition.x ) + self.width,
+				bottom: Math.round( self.lastPosition.y ) + self.height
 			};
 		}
 
@@ -117,9 +118,11 @@ Item.prototype.update = function(game){
 };
 
 Item.prototype.checkCollisions = function(){
+
+	var intersectingObjects = this.getIntersectingObjects();
 	if(this.isMovingObject){
-		this.checkCollisionsY && this.checkCollisionsY();
-		this.checkCollisionsX && this.checkCollisionsX();
+		this.checkCollisionsY(intersectingObjects);
+		this.checkCollisionsX(intersectingObjects);
 	}
 };
 
@@ -136,48 +139,36 @@ Item.prototype.getLeadingCorner = function(position){
 };
 
 
-Item.prototype.checkCollisionsX = function(withControls){
+Item.prototype.checkCollisionsX = function(intersectingItems){
 	var self = this,
 		leadingXCoord = self.getLeadingCorner()['x'],
-		intersectingItems = self.getIntersectingObjects(),
 		//todo: figure out why these differ
 		sides = self.sides();
-
-		if(self instanceof Player && JSON.stringify(sides) !== JSON.stringify(self.theSides)){
-			//debugger;
-		}
 
 		intersectingItems
 			.filter(function(object){
 
 				var objectSides = object.theSides;
-
+				
 				return object.isObstacle
 					&& !object.isOneWay // one-ways don't affect x-collisions
 					&& ( sides.current.bottom > objectSides.current.top )
-					&& ( sides.current.top < objectSides.current.bottom )
-					// don't get trapped if against obstacle!
-					&& ( self.direction === 'right' 
-						? ( sides.current.left <= objectSides.current.right ) 
-						: true )
-					&& ( self.direction === 'left' 
-						? ( sides.current.right >= objectSides.current.left ) 
-						: true );
+					&& ( sides.current.top < objectSides.current.bottom );
 			})
-			.forEach(function(obj){
-				var nearestEdge = self.direction === 'left' ? obj.position.x + obj.width : obj.position.x;
+			.forEach(function(object){
 
-				if(self.position.x !== self.lastPosition.x){
-					//console.log('from ', self.lastPosition.x, ' to', self.position.x)
-				}
+				var objectSides = object.theSides,
+					nearestEdge = self.direction === 'left' ? objectSides.current.right : objectSides.current.left;
 
-				if(self.momentum.x < 0){
+				// if moving left AND last position was to right of object
+				if(self.momentum.x < 0 && sides.last.left >= object.theSides.current.right ){
 					self.position.x = self.lastPosition.x + Math.max(self.momentum.x, nearestEdge - leadingXCoord);
 					self.direction = 'left';
-				} else if(self.momentum.x > 0){
-					self.position.x = self.lastPosition.x + Math.min(self.momentum.x, obj.position.x - leadingXCoord);
+				// moving right AND last position is to left of obstacle
+				} else if(self.momentum.x > 0 && sides.last.right <= object.theSides.current.left){
+					self.position.x = self.lastPosition.x + Math.min(self.momentum.x, object.position.x - leadingXCoord);
 					self.direction = 'right';
-				}
+				} 
 
 				// trigger interaction if there is one to trigger
 
@@ -185,21 +176,22 @@ Item.prototype.checkCollisionsX = function(withControls){
 
 };
 
-Item.prototype.checkCollisionsY = function(){
+Item.prototype.checkCollisionsY = function(intersectingItems){
 
 	var self = this,
 		leadingCoord = self.getLeadingCorner(),
 		leadingYCoord = leadingCoord.y,
 		isOnGround, ground,
-		sides = self.theSides,
-		intersectingItems = self.getIntersectingObjects()
-			.filter(function(object){
+		sides = self.theSides;
+
+		intersectingItems = intersectingItems
+			.filter(function (object){
 
 				var objectSides = object.theSides;
 
 				return ( object.isObstacle && ( !(self instanceof Player) || ( object.isOneWay ? self.game.oneWaysEnabled : true ) ) )
 					&& ( object.isOneWay ? self.momentum.y >= 0 : true )
-					&& ( self.momentum.y >= 0 ? self.wasAbove(object) : self.wasBelow(object) );
+					&& ( self.momentum.y >= 0 ? self.wasAbove( object ) : self.wasBelow( object ) );
 			});
 
 
@@ -215,7 +207,7 @@ Item.prototype.checkCollisionsY = function(){
 					self.position.y = nearestEdge;
 					self.momentum.y = 0;
 
-				} else if(self.momentum.y > 0){
+				} else if( self.momentum.y > 0 ){
 
 					self.position.y = self.lastPosition.y + Math.min( self.momentum.y, nearestEdge - leadingYCoord );
 					// wait to cancel out momentum until after bounce logic
@@ -224,7 +216,7 @@ Item.prototype.checkCollisionsY = function(){
 					ground - object;
 				}
 
-				if(self.position.y + self.height === nearestEdge){
+				if( self.position.y + self.height === nearestEdge ){
 					isOnGround = true;
 					ground = object;
 				}

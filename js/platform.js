@@ -7,6 +7,12 @@ function Platform(game,options){
 		x: options.x,
 		y: options.y
 	};
+
+	self.lastPosition = {
+		x: self.position.x,
+		y: self.position.y
+	};
+
 	self.width = options.width;
 	self.height = options.height;
 	self.game = game;

@@ -30,7 +30,10 @@ function Player(game,options){
 		y: parseInt(options.y,10)
 	};
 
-	self.lastPosition = {};
+	self.lastPosition = {
+		x: self.position.x,
+		y: self.position.y
+	};
 	self.momentum = {
 		x: 0,
 		y: 0.1
@@ -71,7 +74,7 @@ Player.prototype.update = function(){
 	}
 
 	if(bounce){
-		self.momentum.y = -(self.momentum.y+1);
+		self.momentum.y = -( self.momentum.y + 1 );
 	}
 
 	// accelerate left
@@ -107,7 +110,7 @@ Player.prototype.update = function(){
 
 	self.updateCrouching(self.game.inputs.isDown('DOWN'));
 
-	Item.prototype.update.call(self);
+	Item.prototype.update.call(self,self.game);
 	
 };
 
@@ -169,6 +172,6 @@ Player.prototype.usePickup = function(){
 Player.prototype.jump = function(){
 	var self = this;
 	this.position.y -=1;
-	this.momentum.y = this.isCrouching ? -5 : -4;
+	this.momentum.y = this.isCrouching ? -5 : -3;
 	resources.get('audio/jump.wav').play();
 };
