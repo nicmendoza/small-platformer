@@ -27,15 +27,17 @@ Pickup.prototype.types = {
 
 	fireball: function(pickup){
 
+		var size = 20;
+
 		pickup.label = 'Fireball',
 		pickup.sprite = new Sprite({
 			position: {
 				x: 0,
-				y: 10
+				y: size
 			},
 			size: {
-				height: 10,
-				width: 10
+				height: size,
+				width: size
 			},
 			url: 'img/sprites.png',
 			frames: [0]
@@ -43,9 +45,15 @@ Pickup.prototype.types = {
 
 		pickup.use = function(player){
 			var now = new Date(),
-					fireDelay = 500,
+					fireDelay = 500,//ms
 					maxBounces = 3,
+					initialMomentumY = -3,
 					fireball;
+
+				// if player is holding TWO fireballs, double the number of bounces
+				if(player.pickups[1] && player.pickups[1].label === 'Fireball'){
+					maxBounces = maxBounces * 2;
+				}
 
 				// prevent rapid-fire
 				if(player.lastFired && now - player.lastFired < fireDelay){
@@ -65,15 +73,15 @@ Pickup.prototype.types = {
 						y: 0
 					},
 					size: {
-						height: 10,
-						width: 10
+						height: size,
+						width: size
 					},
 					speed: 10, // frames per second,
 					frames: [0,1,2,3,4,5]
 				});
 
-				fireball.width = 8;
-				fireball.height = 8;
+				fireball.width = size;
+				fireball.height = size;
 				fireball.position = {
 					x: player.position.x,
 					y: player.position.y
@@ -81,8 +89,8 @@ Pickup.prototype.types = {
 				fireball.lastPosition = {};
 
 				fireball.momentum = {
-					x: player.momentum.x * 1.2 || ( player.direction === 'left' ? -2 : 2),
-					y: -3
+					x: player.momentum.x * 1.2 || ( player.direction === 'left' ? -4 : 4),
+					y: initialMomentumY
 				}
 
 				fireball.direction = player.direction;
@@ -100,7 +108,7 @@ Pickup.prototype.types = {
 
 					//force a bounce!
 					if(!fireball.isFalling){
-						fireball.momentum.y = -3;
+						fireball.momentum.y = initialMomentumY;
 						fireball.position.y -= 0.1;
 						fireball.bounces++;
 					}

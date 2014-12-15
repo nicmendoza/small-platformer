@@ -5,16 +5,16 @@ function Player(game,options){
 
 	self.options = options;
 	
-	self.height = 10;
-	self.width = 10;
+	self.height = 20;
+	self.width = 20;
 
 	self.baseSize = {
 		height: self.height,
 		width: self.width
 	};
 
-	self.maxMovementSpeed = 2;
-	self.jumpSpeed = 3;
+	self.maxMovementSpeed = self.height * 0.2;
+	self.jumpSpeed = self.height * 0.5;
 	self.currentMovementSpeed = self.maxMovementSpeed;
 	self.direction = 'left';
 	self.isMovingObject = true;
@@ -172,6 +172,6 @@ Player.prototype.usePickup = function(){
 Player.prototype.jump = function(){
 	var self = this;
 	this.position.y -=1;
-	this.momentum.y = this.isCrouching ? -5 : -3;
+	this.momentum.y = -( this.isCrouching ? self.jumpSpeed : self.jumpSpeed * 0.85 );
 	resources.get('audio/jump.wav').play();
 };

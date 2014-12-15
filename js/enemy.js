@@ -7,8 +7,8 @@ function Enemy(game,options){
 		y: options.y
 	};
 	self.game = game;
-	self.width = 10;
-	self.height = 10;
+	self.width = 20;
+	self.height = 20;
 
 	self.options = options;
 

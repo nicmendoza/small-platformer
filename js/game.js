@@ -11,8 +11,8 @@ function Game(canvas){
 	self.fps = 0;
 	self.frames = 0;
 
-	self.gravity = 10;
-	self.maxFallSpeed = 5;
+	self.gravity = 6;
+	self.maxFallSpeed = 12;
 	self.oneWaysEnabled = true;
 
 	self.deaths = 0;
@@ -92,7 +92,7 @@ function Game(canvas){
 	var levelLoader = new LevelLoader(game);
 
 	self.load = function(level){
-		levelLoader.load(self, 'levels/level-01.svg', function(){
+		levelLoader.load(self, 'levels/level-03.svg', function(){
 			self.draw();
 		});
 	};

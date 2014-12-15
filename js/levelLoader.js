@@ -10,6 +10,10 @@ function LevelLoader(game){
 			var el = document.createElement('div');
 			el.innerHTML = resp;
 
+			//assumes ony element in response docmuent is an svg
+			//game.width = el.children[0].width.baseVal.value;
+			//game.height = el.children[0].height.baseVal.value;
+
 			game.setLevel( self.createLevel( el.children[0].querySelectorAll('stage') ) );
 			
 			typeof callback === 'function' && callback();

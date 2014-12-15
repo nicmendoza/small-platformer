@@ -47,15 +47,23 @@ Stage.prototype.camera = {
 	},
 	nudge: function(player){
 
-		var activeZoneWidth = 200,
+		var activeZoneWidth = this.width / 3, // move camera if player within 1/3 width of edge of screen
+			activeZoneHeight = this.height * 0.1, // move camera if player within top 10% of screen
 			// get player's drawn location
-			playerPositionX = this.getRenderPosition(player).x;
+			playerPosition = this.getRenderPosition(player);
 
-		if(playerPositionX < activeZoneWidth){
-			this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
-		} else if(playerPositionX > this.width - activeZoneWidth ) {
-			this.position.x += (this.width - activeZoneWidth - playerPositionX) * this.relativeMovementRatio;
-		};
+		if(playerPosition.x < activeZoneWidth){
+			this.position.x = Math.min(0, this.position.x + activeZoneWidth - playerPosition.x) * this.relativeMovementRatio;
+		} else if(playerPosition.x > this.width - activeZoneWidth ) {
+			this.position.x += (this.width - activeZoneWidth - playerPosition.x) * this.relativeMovementRatio;
+		}
+
+		if(this.game.player.position.y < activeZoneHeight){
+			this.position.y = -( this.game.player.position.y - activeZoneHeight);
+		} else {
+			this.position.y = 0;
+		}
+
 	},
 	playerStageFollowing: function(player){
 		this.position.x = player.stage.position.x;

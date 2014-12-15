@@ -4,9 +4,30 @@
 
 		<platform x="0" y="380" width="2000" height="20" color="salmon" />
 		<pickup x="400" y="370" type="fireball" />
+		<pickup x="420" y="370" type="fireball" />
 
 		<platform x="300" y="300" width="20" height="200" color="salmon" />
 		
+		<enemy x="90" y="350" type="jumping_jack" />
+		<enemy x="100" y="350" type="jumping_jack" />
+		<enemy x="120" y="350" type="jumping_jack" />
+		<enemy x="130" y="350" type="jumping_jack" />
+		<enemy x="140" y="350" type="jumping_jack" />
+		<enemy x="150" y="350" type="jumping_jack" />
+		<enemy x="160" y="350" type="jumping_jack" />
+		<enemy x="170" y="350" type="jumping_jack" />
+		<enemy x="180" y="350" type="jumping_jack" />
+		<enemy x="200" y="350" type="jumping_jack" />
+		<enemy x="200" y="350" type="jumping_jack" />
+		<enemy x="210" y="350" type="jumping_jack" />
+		<enemy x="90" y="350" type="jumping_jack" />
+		<enemy x="90" y="350" type="jumping_jack" />
+		<enemy x="90" y="350" type="jumping_jack" />
+		<enemy x="90" y="350" type="jumping_jack" />
+		<enemy x="90" y="350" type="jumping_jack" />
+		<enemy x="90" y="350" type="jumping_jack" />
+		<enemy x="90" y="350" type="jumping_jack" />
+		<enemy x="90" y="350" type="jumping_jack" />
 		<enemy x="90" y="350" type="jumping_jack" />
 
 		<platform x="251" y="380" width="200" height="20" color="salmon" />
@@ -19,13 +40,14 @@
 		<platform x="700" y="260" width="160" height="20" color="brown" isoneway="true" />
 
 		<line id="line-one" x1="330" y1="220" x2="330" y2="315" />
-		<platform width="160" height="20" color="purple" isoneway="true" path="line-one" speed="20" />
+		<platform width="160" height="20" color="purple" path="line-one" speed="20" />
 
 		<line id="line-two" x1="50" y1="340" x2="130" y2="340"/>
 		<platform width="160" height="20" color="green" isoneway="true" path="line-two" speed="50" />
 
 		<enemy x="440" y="360" type="jumping_jack" />
 		<player x="400" y="200" color="pink" />
+		<player x="450" y="200" color="pink" />
 
 
 	</stage>
