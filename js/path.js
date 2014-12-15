@@ -45,7 +45,7 @@ function Line(game,options){
 Line.prototype.projectPosition = function(entity,secondsElapsed){
 	var self = this,
 		traversalTime = self.totalDistance / entity.options.speed, // seconds
-		distance = self.totalDistance * ( secondsElapsed / traversalTime ), // pixels
+		distance = (self.totalDistance * ( secondsElapsed / traversalTime ) )%traversalTime, // pixels
 		angle = entity.direction === 'backward' ? self.angle : ( self.angle + Math.PI ), // radians
 		now = new Date(),
 		timeElapsed = now - entity.legStartTime;
