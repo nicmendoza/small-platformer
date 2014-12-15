@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 15.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="3000px" height="520px" viewBox="0 0 3000 520" style="enable-background:new 0 0 3000 520;" xml:space="preserve">
+<style type="text/css">
+<![CDATA[
+	.st0{fill:#ED1C24;}
+	.st1{fill:#F5A0C5;}
+	.st2{fill:#39B54A;}
+	.st3{fill:none;stroke:#00AEEF;stroke-miterlimit:10;}
+]]>
+</style>
+<stage camera="nudge" distance="1">
+	<platform x="0" y="500" width="400" height="20"/>
+	<platform x="140" y="440" width="60" height="20"/>
+	<platform x="260" y="420" width="60" height="20"/>
+	<platform x="440" y="420" width="120" height="20"/>
+	<platform x="560" y="380" width="60" height="20"/>
+	<platform x="720" y="340" width="20" height="20"/>
+	<platform x="720" y="260" width="20" height="20"/>
+	<platform x="720" y="220" width="20" height="20"/>
+	<platform x="720" y="180" width="20" height="20"/>
+	<platform x="720" y="140" width="20" height="20"/>
+	<platform x="720" y="100" width="20" height="20"/>
+	<platform x="680" y="380" width="120" height="140"/>
+	<platform x="820" y="500" width="100" height="20"/>
+	<platform x="1200" y="500" width="100" height="20"/>
+	<platform x="2680" y="500" width="320" height="20"/>
+	<platform x="220" y="420" width="20" height="80"/>
+	<platform x="220" y="340" width="20" height="40"/>
+	<platform x="340" y="380" width="80" height="20"/>
+	<platform x="240" y="360" width="60" height="20"/>
+	<platform x="80" y="380" width="80" height="20"/>
+	<platform x="0" y="320" width="80" height="20"/>
+	<platform x="1460" y="480" width="20" height="20"/>
+	<platform x="1500" y="440" width="20" height="20"/>
+	<platform x="1540" y="400" width="20" height="20"/>
+	<platform x="1580" y="360" width="20" height="20"/>
+	<platform x="1620" y="340" width="20" height="20"/>
+	<platform x="1680" y="320" width="20" height="20"/>
+	<platform x="1740" y="320" width="20" height="20"/>
+	<platform x="1840" y="440" width="20" height="20"/>
+	<platform x="1940" y="500" width="80" height="20"/>
+	<platform x="2480" y="400" width="80" height="20"/>
+	<platform x="2480" y="360" width="80" height="20"/>
+	<platform x="2480" y="320" width="80" height="20"/>
+	<platform x="2480" y="260" width="80" height="20"/>
+	<platform x="2480" y="220" width="80" height="20"/>
+	<platform x="2020" y="440" width="20" height="80"/>
+	<platform x="2060" y="440" width="20" height="80"/>
+	<platform x="2100" y="440" width="20" height="80"/>
+	<platform x="2160" y="440" width="20" height="80"/>
+	<platform x="2200" y="440" width="20" height="80"/>
+	<platform x="2260" y="440" width="20" height="80"/>
+	<platform x="2300" y="440" width="20" height="80"/>
+	<platform x="2340" y="440" width="20" height="80"/>
+	<platform x="2440" y="440" width="20" height="80"/>
+	<platform x="2400" y="440" width="20" height="80"/>
+	<platform x="2980" y="400" width="20" height="100"/>
+
+	<pickup x="720" y="80" width="20" height="20" type="fireball"/>
+	<pickup x="220" y="320" width="20" height="20" type="fireball"/>
+	<enemy x="460" y="400" type="jumping_jack"/>
+	<enemy x="500" y="400" type="jumping_jack"/>
+	<enemy x="720" y="320" type="jumping_jack"/>
+	<enemy x="880" y="420" type="jumping_jack"/>
+	<enemy x="1220" y="300" width="20" height="20"/>
+
+	<line id="line1" x1="840" y1="440" x2="1100" y2="440"/>
+	<platform x="840" y="440" width="100" height="2" path="line1" speed="20" />
+
+	<line id="line2" x1="640" y1="380" x2="640" y2="200"/>
+	<platform x="640" y="280" width="20" height="100" path="line2" speed="20"/>
+
+	<line id="line3" x1="960" y1="400" x2="1220" y2="400"/>
+	<platform x="960" y="400" width="100" height="2" path="line3" speed="20"/>
+
+	<line id="line4" x1="1080" y1="360" x2="1340" y2="360"/>
+	<platform x="1080" y="360" width="100" height="2" path="line4" speed="20"/>
+
+	<line id="line5" x1="1160" y1="320" x2="1420" y2="320"/>
+	<platform x="1160" y="320" width="100" height="2" path="line5" speed="20"/>
+
+	<player x="20" y="480" width="20" height="20" color="pink"/>
+</stage>
+</svg>
