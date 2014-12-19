@@ -62,19 +62,19 @@
 	<player x="40" y="440" class="st1" width="40" height="40" color="pink"/>
 
 		<line class="st3" x1="1680" y1="360" x2="2200" y2="360" id="line1"/>
-		<platform x="1680" y="360" width="200" height="40" path="line1" speed="40"/>
+		<platform x="1680" y="360" width="200" height="40" path="line1" speed="35"/>
 
 		<line class="st3" x1="1280" y1="240" x2="1280" y2="-120" id="line2"/>
-		<platform x="1280" y="40" width="40" height="200" path="line2" speed="40"/>
+		<platform x="1280" y="40" width="40" height="200" path="line2" speed="45"/>
 
 		<line class="st3" x1="1920" y1="280" x2="2440" y2="280" id="line3"/>
-		<platform x="1920" y="280" width="200" height="40" path="line3" speed="40"/>
+		<platform x="1920" y="280" width="200" height="40" path="line3" speed="50"/>
 
 		<line class="st3" x1="2160" y1="200" x2="2680" y2="200" id="line4"/>
-		<platform x="2160" y="200" width="200" height="40" path="line4" speed="40"/>
+		<platform x="2160" y="200" width="200" height="40" path="line4" speed="55"/>
 
 		<line class="st3" x1="2320" y1="120" x2="2840" y2="120" id="line5"/>
-		<platform x="2320" y="120" width="200" height="40" path="line5" speed="40"/>
+		<platform x="2320" y="120" width="200" height="40" path="line5" speed="60"/>
 
 	<platform x="5960" y="280" width="40" height="200"/>
 </stage>
