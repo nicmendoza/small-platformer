@@ -1,20 +1,25 @@
 function Player(game,options){
-	var self = this;
+
+	var width = 50,
+		spriteWidth = width + 10,
+		height = 60,
+		self = this;
+
 
 	self.game = game;
 
 	self.options = options;
 	
-	self.height = 20;
-	self.width = 20;
+	self.height = height;
+	self.width = width;
 
 	self.baseSize = {
 		height: self.height,
 		width: self.width
 	};
 
-	self.maxMovementSpeed = self.height * 0.2;
-	self.jumpSpeed = self.height * 0.5;
+	self.maxMovementSpeed = 4;
+	self.jumpSpeed = 10;
 	self.currentMovementSpeed = self.maxMovementSpeed;
 	self.direction = 'left';
 	self.isMovingObject = true;
@@ -38,6 +43,75 @@ function Player(game,options){
 		x: 0,
 		y: 0.1
 	};
+
+	self.states = {
+		'standing': new Sprite({
+			position: {
+				x: 0,
+				y: 170
+			},
+			size: {
+				height: height,
+				width: spriteWidth
+			},
+			url: 'img/sprites.png',
+			frames: [0]
+		}),
+		'crouching': new Sprite({
+			position: {
+				x: 60,
+				y: 170
+			},
+			size: {
+				height: height,
+				width: spriteWidth
+			},
+			url: 'img/sprites.png',
+			frames: [0]
+		}),
+		'walkright' : new Sprite({
+			position: {
+				x: 0,
+				y: 40
+			},
+			size: {
+				height: height,
+				width: spriteWidth
+			},
+			url: 'img/sprites.png',
+			speed: 4,
+			frames: [1,0,2,0]
+		}),
+		'walkleft' : new Sprite({
+			position: {
+				x: 0,
+				y: 108
+			},
+			size: {
+				height: height,
+				width: spriteWidth
+			},
+			url: 'img/sprites.png',
+			speed: 4,
+			frames: [1,0,2,0]
+		}),
+		'waving' : new Sprite({
+			position: {
+				x: 0,
+				y: 233
+			},
+			size: {
+				height: height,
+				width: 80
+			},
+			url: 'img/sprites.png',
+			speed: 5,
+			frames: [0,1,2,3,2,1]
+		})
+	}
+
+	self.sprite = self.states['standing'];
+
 }
 
 Player.prototype = new Item();
@@ -81,12 +155,16 @@ Player.prototype.update = function(){
 	if(self.game.inputs.isDown('LEFT') && !self.game.inputs.isDown('RIGHT')){
 		self.direction = 'left';
 		self.momentum.x = -( Math.min( Math.abs(self.momentum.x)+ .2, self.maxMovementSpeed ) );
+
+		self.sprite = self.states['walkleft'];
 	}
 
 	// accelerate right
 	if(self.game.inputs.isDown('RIGHT') && !self.game.inputs.isDown('LEFT')){
 		self.direction = 'right';
 		self.momentum.x = Math.min( Math.abs(self.momentum.x)+ .2, self.maxMovementSpeed );
+
+		self.sprite = self.states['walkright'];
 	}
 
 	// if player holding neither or both LEFT/RIGHT, slow down
@@ -110,22 +188,24 @@ Player.prototype.update = function(){
 
 	self.updateCrouching(self.game.inputs.isDown('DOWN'));
 
+	self.updateSpriteState();
+
 	Item.prototype.update.call(self,self.game);
 	
 };
 
-Player.prototype.draw = function(ctx){
-	var self = this,
-		position;
+// Player.prototype.draw = function(ctx){
+// 	var self = this,
+// 		position;
 
-	// only close over these values AFTER player has updated
-	position = self.stage.getRenderPosition(self);
+// 	// only close over these values AFTER player has updated
+// 	position = self.stage.getRenderPosition(self);
 
-	ctx.fillStyle = self.options.color || 'black';
-	ctx.fillRect(position.x,position.y,self.width,self.height);
-	ctx.fillStyle = '#FF4444';
-	ctx.fillRect(position.x + ( self.direction === 'left' ? -2 : 0 ),position.y-2,self.width+2,2);
-};
+// 	ctx.fillStyle = self.options.color || 'black';
+// 	ctx.fillRect(position.x,position.y,self.width,self.height);
+// 	ctx.fillStyle = '#FF4444';
+// 	ctx.fillRect(position.x + ( self.direction === 'left' ? -2 : 0 ),position.y-2,self.width+2,2);
+// };
 
 // returns false if player survives
 Player.prototype.die = function(){
@@ -174,4 +254,31 @@ Player.prototype.jump = function(){
 	this.position.y -=1;
 	this.momentum.y = -( this.isCrouching ? self.jumpSpeed : self.jumpSpeed * 0.85 );
 	resources.get('audio/jump.wav').play();
+};
+
+Player.prototype.updateSpriteState = function(){
+
+	var self = this;
+
+	// if we're not moving at all
+	if(!self.momentum.x && !self.momentum.y){
+		// if we're waving
+		if( self.sprite === self.states['waving'] ){
+			// do nothing
+		// else if we're not waving and a dice roll comes up positive
+		} else if( self.sprite !== self.states['waving'] && Math.round( Math.random() * 0.501 ) ) {
+			// set sprite to waving
+			self.sprite = self.states['waving'].reset();
+
+		// else
+		} else {
+			// set sprite to standing
+			self.sprite = self.states['standing'].reset();
+		}
+		
+	}
+
+	if(self.isCrouching){
+		self.sprite = self.states['crouching'];
+	}
 };

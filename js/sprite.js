@@ -1,5 +1,7 @@
 //url, position, size, speed, frames, direction, once
 
+//todo: center sprite over entity, or maybea way to provide an offset
+
 function Sprite(options) {
     this.position = options.position;
     this.size = options.size;
@@ -22,9 +24,9 @@ Sprite.prototype.draw = function(ctx,position,elapsedTime){
 
 
     if(this.direction === 'vertical'){
-    	y += this.currentFrame * this.size.height;
+    	y += this.frames[this.currentFrame] * this.size.height;
     } else {
-    	x += this.currentFrame * this.size.width;
+    	x += this.frames[this.currentFrame] * this.size.width;
     }
 
 
@@ -41,8 +43,13 @@ Sprite.prototype.update = function(elapsedTime){
 		this._index = 0;
 
 		//however, if we've gone too far, reset to frame 0
-		if(this.currentFrame === this.frames.length){
+		if(this.currentFrame === this.frames.length-1){
 			this.currentFrame = 0;
 		}
 	}
 };
+
+Sprite.prototype.reset = function(){
+	this.currentFrame = 0;
+	return this;
+}

@@ -59,7 +59,7 @@
 	<enemy type="jumping_jack" x="4800" y="320" class="st0" width="40" height="40"/>
 	<enemy type="jumping_jack" x="5360" y="380" class="st0" width="100" height="100"/>
 
-	<player x="40" y="440" class="st1" width="40" height="40" color="pink"/>
+	<player x="40" y="420" class="st1" width="40" height="40" color="pink"/>
 
 		<line class="st3" x1="1680" y1="360" x2="2200" y2="360" id="line1"/>
 		<platform x="1680" y="360" width="200" height="40" path="line1" speed="35"/>

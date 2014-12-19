@@ -11,6 +11,8 @@ function Game(canvas){
 	self.fps = 0;
 	self.frames = 0;
 
+	self.timeSinceLastDraw = 0;
+
 	self.gravity = 6;
 	self.maxFallSpeed = 12;
 	self.oneWaysEnabled = true;
