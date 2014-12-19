@@ -93,6 +93,9 @@ function Game(canvas){
 
 	self.load = function(level){
 		levelLoader.load(self, 'levels/level-03.svg', function(){
+			//update game state every 60th of a second
+			setInterval(self.tick.bind(self),1000/60);
+			//start draw loop
 			self.draw();
 		});
 	};
@@ -112,7 +115,7 @@ function Game(canvas){
 
 }
 
-Game.prototype.draw = function(){
+Game.prototype.tick = function(){
 	var self = this,
 		now = new Date(), 
 		stage;
@@ -121,10 +124,6 @@ Game.prototype.draw = function(){
 	self.timeSinceLastDraw = ( now - ( self.lastDrawTime || now - 1 ) ) / 1000;
 
 	self.ctx.save();
-	self.ctx.fillStyle = this.backgroundColor;
-	self.ctx.clearRect(0,0,this.width,this.height);
-	self.ctx.fillRect(0,0,this.width,this.height);
-	self.ctx.restore();
 
 	for(var i = self.stages.length  - 1; i >= 0; i--){
 		stage = self.stages[i];
@@ -136,12 +135,6 @@ Game.prototype.draw = function(){
 
 		stage.objects.forEach(function(object){
 			object.checkCollisions && object.checkCollisions();
-		});
-
-		stage.objects.forEach(function(object){
-			self.ctx.save();
-			object.draw(self.ctx,self.timeSinceLastDraw);
-			self.ctx.restore();
 		});
 
 		stage.update(self.player);
@@ -156,8 +149,6 @@ Game.prototype.draw = function(){
 		
 	}
 
-	self.HUD.draw(self.ctx);
-
 	self.lastDrawTime = now;
 
 	//force update of gamepad object
@@ -169,7 +160,30 @@ Game.prototype.draw = function(){
 		self.periodStart = new Date();
 		self.frames = 0;
 	}
+};
 
+Game.prototype.draw = function(){
+	var self = this,
+		now = new Date(), 
+		stage;
+
+	self.ctx.save();
+	self.ctx.fillStyle = this.backgroundColor;
+	self.ctx.clearRect(0,0,this.width,this.height);
+	self.ctx.fillRect(0,0,this.width,this.height);
+	self.ctx.restore();
+
+	for(var i = self.stages.length  - 1; i >= 0; i--){
+		stage = self.stages[i];
+
+		stage.objects.forEach(function(object){
+			self.ctx.save();
+			object.draw(self.ctx,self.timeSinceLastDraw);
+			self.ctx.restore();
+		});
+
+	}
+	self.HUD.draw(self.ctx);
 	
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));
