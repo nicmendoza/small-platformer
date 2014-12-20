@@ -34,6 +34,10 @@ Stage.prototype.addObject = function(object){
 	object.stage = this;
 };
 
+Stage.prototype.removeObject = function(object){
+	return this.objects.splice( this.objects.indexOf(object),1 );
+};
+
 Stage.prototype.getRenderPosition = function(object){
 	return {
 		x: ( object.position.x + this.position.x ) * this.relativeMovementRatio,
