@@ -37,19 +37,29 @@ Sprite.prototype.update = function(elapsedTime){
 	this._index += elapsedTime;
 
 	// _index tracks time since last frame change, it increments based on speed
-	if(this._index > 1 / this.speed){
+	if(!this.completed && this._index > 1 / this.speed){
 		// go to next frame and reset index
 		this.currentFrame++;
 		this._index = 0;
 
 		//however, if we've gone too far, reset to frame 0
 		if(this.currentFrame === this.frames.length-1){
-			this.currentFrame = 0;
+			if(this.once){
+				this.completed = true;
+				this.currentFrame = this.frames[this.frames.length - 1];
+				if(typeof this.onCompleteOnce === 'function'){
+					this.onCompleteOnce();
+				}
+			} else {
+				this.currentFrame = 0;
+			}
+			
 		}
 	}
 };
 
 Sprite.prototype.reset = function(){
 	this.currentFrame = 0;
+	this.completed = false;
 	return this;
 }

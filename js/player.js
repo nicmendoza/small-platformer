@@ -106,8 +106,34 @@ function Player(game,options){
 			},
 			url: 'img/sprites.png',
 			speed: 5,
-			frames: [0,1,2,3,2,1]
+			frames: [0,1,2,3,2,1],
+			once: true
+		}),
+		'jumpright' : new Sprite({
+			position: {
+				x: 181,
+				y: 40
+			},
+			size: {
+				height: height,
+				width: spriteWidth
+			},
+			url: 'img/sprites.png',
+			frames: [0]
+		}),
+		'jumpleft' : new Sprite({
+			position: {
+				x: 181,
+				y: 108
+			},
+			size: {
+				height: height,
+				width: spriteWidth
+			},
+			url: 'img/sprites.png',
+			frames: [0]
 		})
+
 	}
 
 	self.sprite = self.states['standing'];
@@ -269,6 +295,11 @@ Player.prototype.updateSpriteState = function(){
 		} else if( self.sprite !== self.states['waving'] && Math.round( Math.random() * 0.501 ) ) {
 			// set sprite to waving
 			self.sprite = self.states['waving'].reset();
+			//assign callback for when animate complete
+			self.sprite.onCompleteOnce = function(){
+				//set to standing
+				self.sprite = self.states['standing'];
+			}
 
 		// else
 		} else {
@@ -280,5 +311,13 @@ Player.prototype.updateSpriteState = function(){
 
 	if(self.isCrouching){
 		self.sprite = self.states['crouching'];
+	}
+
+	if(self.isFalling){
+		if(self.direction === 'left'){
+			self.sprite = self.states['jumpleft'];
+		} else if(self.direction === 'right'){
+			self.sprite = self.states['jumpright'];
+		}
 	}
 };
