@@ -155,13 +155,6 @@ Game.prototype.tick = function(){
 
 	//force update of gamepad object
 	navigator.getGamepads();
-
-	self.frames++;
-	if(now - self.periodStart >= 1000){
-		self.fps = self.frames;
-		self.periodStart = new Date();
-		self.frames = 0;
-	}
 };
 
 Game.prototype.draw = function(){
@@ -189,6 +182,13 @@ Game.prototype.draw = function(){
 	
 	if(this.run){
 		window.requestAnimationFrame(this.draw.bind(this));
+	}
+
+	self.frames++;
+	if(now - self.periodStart >= 1000){
+		self.fps = self.frames;
+		self.periodStart = new Date();
+		self.frames = 0;
 	}
 	
 };
