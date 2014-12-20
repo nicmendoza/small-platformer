@@ -12,6 +12,7 @@ function Game(canvas){
 	self.frames = 0;
 
 	self.timeSinceLastDraw = 0;
+	self.maxObjects = 0;
 
 	self.gravity = 6;
 	self.maxFallSpeed = 12;
@@ -40,6 +41,20 @@ function Game(canvas){
 			ctx.fillText('fps: ' + self.fps, 4,28);
 		}
 	});
+
+	self.HUD.addHUDItem({
+		draw: function(ctx){
+			ctx.font = '14px arial';
+			ctx.fillText('total objects: ' + self.stages[0].objects.length, 4,42);
+		}
+	});
+
+	// self.HUD.addHUDItem({
+	// 	draw: function(ctx){
+	// 		ctx.font = '14px arial';
+	// 		ctx.fillText('max objects: ' + self.maxObjects, 4,56);
+	// 	}
+	// });
 
 	self.HUD.addHUDItem({
 		draw: function(ctx){
@@ -150,6 +165,8 @@ Game.prototype.tick = function(){
 		}
 		
 	}
+
+	self.maxObjects = Math.max(self.maxObjects,self.stages.reduce(function(prev,stage){return prev + stage.objects.length},0));
 
 	self.lastDrawTime = now;
 
