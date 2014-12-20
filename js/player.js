@@ -155,7 +155,7 @@ Player.prototype.update = function(){
 			.forEach(function(enemy){
 				if(self.momentum.y > 0 && self.wasAbove(enemy)){
 					resources.get('audio/stomp.wav').play();
-					enemy.die();
+					enemy.die() && self.sparkles();
 					bounce = true;
 				} else if(!enemy.isDead) {
 					self.die() || enemy.die();
@@ -182,7 +182,9 @@ Player.prototype.update = function(){
 		self.direction = 'left';
 		self.momentum.x = -( Math.min( Math.abs(self.momentum.x)+ .2, self.maxMovementSpeed ) );
 
-		self.sprite = self.states['walkleft'];
+		if(self.sprite !== self.states['walkleft']){
+			self.sprite = self.states['walkleft'].reset();
+		}
 	}
 
 	// accelerate right
@@ -190,7 +192,10 @@ Player.prototype.update = function(){
 		self.direction = 'right';
 		self.momentum.x = Math.min( Math.abs(self.momentum.x)+ .2, self.maxMovementSpeed );
 
-		self.sprite = self.states['walkright'];
+		if(self.sprite !== self.states['walkright']){
+			self.sprite = self.states['walkright'].reset();
+		}
+		
 	}
 
 	// if player holding neither or both LEFT/RIGHT, slow down
@@ -320,4 +325,21 @@ Player.prototype.updateSpriteState = function(){
 			self.sprite = self.states['jumpright'];
 		}
 	}
+};
+
+//todo: this, better
+Player.prototype.sparkles = function(){
+
+	var sparkPosition = {
+		x: this.position.x + (this.width / 2),
+		y: this.position.y + this.height
+	};
+
+	new Particle('spark', this.stage,sparkPosition, {
+		direction: 'left'
+	});
+
+	new Particle('spark', this.stage,sparkPosition, {
+		direction: 'right'
+	});
 };

@@ -43,7 +43,7 @@ Sprite.prototype.update = function(elapsedTime){
 		this._index = 0;
 
 		//however, if we've gone too far, reset to frame 0
-		if(this.currentFrame === this.frames.length-1){
+		if(this.currentFrame === this.frames.length){
 			if(this.once){
 				this.completed = true;
 				this.currentFrame = this.frames[this.frames.length - 1];
