@@ -1,7 +1,7 @@
 function Player(game,options){
 
 	var width = 50,
-		spriteWidth = width + 10,
+		spriteWidth = width + 30,
 		height = 60,
 		self = this;
 
@@ -59,12 +59,15 @@ function Player(game,options){
 		}),
 		'crouching': new Sprite({
 			position: {
-				x: 60,
+				x: 80,
 				y: 170
 			},
 			size: {
-				height: height,
+				height: 41,
 				width: spriteWidth
+			},
+			offset: {
+				y: -17
 			},
 			url: 'img/sprites.png',
 			frames: [0]
@@ -102,7 +105,7 @@ function Player(game,options){
 			},
 			size: {
 				height: height,
-				width: 80
+				width: spriteWidth
 			},
 			url: 'img/sprites.png',
 			speed: 5,
@@ -111,7 +114,7 @@ function Player(game,options){
 		}),
 		'jumpright' : new Sprite({
 			position: {
-				x: 181,
+				x: 240,
 				y: 40
 			},
 			size: {
@@ -123,7 +126,7 @@ function Player(game,options){
 		}),
 		'jumpleft' : new Sprite({
 			position: {
-				x: 181,
+				x: 240,
 				y: 108
 			},
 			size: {
@@ -323,11 +326,11 @@ Player.prototype.sparkles = function(){
 		y: this.position.y + this.height
 	};
 
-	new Particle('spark', this.stage,sparkPosition, {
+	new Particle(this.game,'spark', this.stage,sparkPosition, {
 		direction: 'left'
 	});
 
-	new Particle('spark', this.stage,sparkPosition, {
+	new Particle(this.game,'spark', this.stage,sparkPosition, {
 		direction: 'right'
 	});
 };

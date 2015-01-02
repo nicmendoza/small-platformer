@@ -13,15 +13,15 @@ function Sprite(options) {
     this.url = options.url;
     this.direction = options.direction || 'horizontal';
     this.once = options.once;
+    this.offset = options.offset;
 };
 
 Sprite.prototype.draw = function(ctx,position,elapsedTime){
 	this.update(elapsedTime);
 
-	var x = this.position.x,
-		y = this.position.y,
+	var x = this.position.x + ( this.offset && this.offset.x ? this.offset.x : 0 ),
+		y = this.position.y - ( this.offset && this.offset.y ? this.offset.y : 0 ),
 		frame,max,index;
-
 
     if(this.direction === 'vertical'){
     	y += this.frames[this.currentFrame] * this.size.height;

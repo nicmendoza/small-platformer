@@ -8,8 +8,8 @@ function Pickup(game,options){
 	};
 	this.game = game;
 
-	this.width = 10;
-	this.height = 10;
+	this.width = 20;
+	this.height = 20;
 
 	this.sprite = options.sprite;
 

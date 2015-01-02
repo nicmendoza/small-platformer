@@ -3,6 +3,9 @@ function Game(canvas){
 
 	self.run = true;
 
+	//uncomment to show bounding boxes
+	//self.showBoundingBoxes = true;
+
 	self.height = canvas.height;
 	self.width = canvas.width;
 	this.backgroundColor = '#D7F8FC';
@@ -49,6 +52,7 @@ function Game(canvas){
 		}
 	});
 
+	//uncomment to show the max number of items that have been shown this session
 	// self.HUD.addHUDItem({
 	// 	draw: function(ctx){
 	// 		ctx.font = '14px arial';

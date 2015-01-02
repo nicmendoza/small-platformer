@@ -1,10 +1,13 @@
-function Particle(type,stage,position,options){
+function Particle(game,type,stage,position,options){
 	var self = this,
 		maxDistance = 20;
 
 	self.position = {};
 	self.position.x = position.x;
 	self.position.y = position.y;
+
+	self.width = 20;
+	self.height = 20;
 
 	self.startPosition = {
 		x: self.position.x,

@@ -67,9 +67,19 @@ Item.prototype.draw = function(ctx,timeSinceLastDraw){
 
 	var position = this.stage.getRenderPosition(this);
 
+
+	if(this.game && this.game.showBoundingBoxes){
+		ctx.fillStyle = 'pink';
+		ctx.fillRect(position.x,position.y,this.width,this.height);
+	}
+	
 	this.drawTransformations && this.drawTransformations(ctx);
 
 	if(this.sprite){
+
+		position.x -= ( ( this.sprite.size.width - this.width )  / 2 );
+		position.y += ( ( this.sprite.size.height - this.height ) / 2 );
+
 		this.sprite.draw(ctx,position,timeSinceLastDraw);
 	} else {
 		ctx.fillRect(position.x,position.y,this.width,this.height);

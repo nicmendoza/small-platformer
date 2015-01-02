@@ -9,17 +9,15 @@ Use W,S,D or LEFT, DOWN, RIGHT arrow keys to move, SPACE to jump, and SHIFT to u
 
 ##Ideas/To-Dos
 
-- todo: moving platforms
 - todo: artwork (top edges for platforms, repeating textures)
 - todo: ladders (?)
 - todo: wall jumping (?)
 - todo: figure out better way for objects to inherit methods
 - todo: try foreground objects (blurred?)
-- todo: path-following enemies
 - todo: move to requireJS for module-loading
 - todo: look up quad trees for storing static level data
-- todo: break out update and collision detection
 - todo: _level editor_
+- todo: toggle bounding box with key
 
 
 ##Music and audio
