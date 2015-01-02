@@ -225,18 +225,6 @@ Player.prototype.update = function(){
 	
 };
 
-// Player.prototype.draw = function(ctx){
-// 	var self = this,
-// 		position;
-
-// 	// only close over these values AFTER player has updated
-// 	position = self.stage.getRenderPosition(self);
-
-// 	ctx.fillStyle = self.options.color || 'black';
-// 	ctx.fillRect(position.x,position.y,self.width,self.height);
-// 	ctx.fillStyle = '#FF4444';
-// 	ctx.fillRect(position.x + ( self.direction === 'left' ? -2 : 0 ),position.y-2,self.width+2,2);
-// };
 
 // returns false if player survives
 Player.prototype.die = function(){
