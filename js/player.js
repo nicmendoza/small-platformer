@@ -302,16 +302,16 @@ Player.prototype.updateSpriteState = function(){
 		
 	}
 
-	if(self.isCrouching){
-		self.sprite = self.states['crouching'];
-	}
-
 	if(self.isFalling){
 		if(self.direction === 'left'){
 			self.sprite = self.states['jumpleft'];
 		} else if(self.direction === 'right'){
 			self.sprite = self.states['jumpright'];
 		}
+	}
+
+	if(self.isCrouching){
+		self.sprite = self.states['crouching'];
 	}
 };
 
