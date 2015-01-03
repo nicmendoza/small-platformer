@@ -124,6 +124,30 @@ function Player(game,options){
 			url: 'img/sprites.png',
 			frames: [0]
 		}),
+		'flailleft' : new Sprite({
+			position: {
+				x: 80,
+				y: 340
+			},
+			size: {
+				height: height,
+				width: spriteWidth
+			},
+			url: 'img/sprites.png',
+			frames: [0]
+		}),
+		'flailright' : new Sprite({
+			position: {
+				x: 80,
+				y: 280
+			},
+			size: {
+				height: height,
+				width: spriteWidth
+			},
+			url: 'img/sprites.png',
+			frames: [0]
+		}),
 		'jumpleft' : new Sprite({
 			position: {
 				x: 0,
@@ -306,10 +330,23 @@ Player.prototype.updateSpriteState = function(){
 	}
 
 	if(self.isFalling){
-		if(self.direction === 'left'){
-			self.sprite = self.states['jumpleft'];
-		} else if(self.direction === 'right'){
-			self.sprite = self.states['jumpright'];
+
+		if(!self.terminalVelocity){
+
+			if(self.direction === 'left'){
+				self.sprite = self.states['jumpleft'];
+			} else if(self.direction === 'right'){
+				self.sprite = self.states['jumpright'];
+			}
+
+		} else {
+
+			if(self.direction === 'left'){
+				self.sprite = self.states['flailleft'];
+			} else if(self.direction === 'right'){
+				self.sprite = self.states['flailright'];
+			}
+
 		}
 	}
 

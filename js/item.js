@@ -239,11 +239,13 @@ Item.prototype.checkCollisionsY = function(intersectingItems){
 
 		});
 
+	self.terminalVelocity = false;
 
 	if(isOnGround){
 
 		// if falling at 75% of max fall speed or faster, bounce when hitting the ground
 		if(self.isFalling && self.momentum.y > self.game.maxFallSpeed * 0.85){
+
 			// flip momentum
 			self.momentum.y = -(Math.ceil( self.momentum.y * ground.springiness) );
 			// if we achieved bounce, get player off ground so they can actually bounce
@@ -259,8 +261,9 @@ Item.prototype.checkCollisionsY = function(intersectingItems){
 	} else { // if is/should be falling
 		self.momentum.y += self.game.gravity * .05;
 		// constrain to max fall speed if falling down
-		if(self.momentum.y > 0){
-			self.momentum.y = Math.min(self.momentum.y, self.game.maxFallSpeed)
+		if(self.momentum.y > 0 && self.momentum.y >= self.game.maxFallSpeed * 0.85){
+			self.momentum.y = Math.min(self.momentum.y, self.game.maxFallSpeed);
+			self.terminalVelocity = true;
 		}
 		// comment out to fly :)
 		self.isFalling = true;
