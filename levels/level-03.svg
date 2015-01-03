@@ -42,7 +42,7 @@
 	<platform x="4880" y="360" width="40" height="160"/>
 	<platform x="4800" y="360" width="40" height="160"/>
 
-	<pickup type="fireball" x="450" y="141" class="st2" width="40" height="40"/>
+	<pickup type="fireball" x="450" y="140" class="st2" width="40" height="40"/>
 
 	<enemy type="jumping_jack" x="920" y="280" class="st0" width="40" height="40"/>
 	<enemy type="jumping_jack" x="1000" y="280" class="st0" width="40" height="40"/>

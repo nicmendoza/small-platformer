@@ -1,7 +1,7 @@
 function Player(game,options){
 
 	var width = 50,
-		spriteWidth = width + 30,
+		spriteWidth = 80,
 		height = 60,
 		self = this;
 
@@ -48,7 +48,7 @@ function Player(game,options){
 		'standing': new Sprite({
 			position: {
 				x: 0,
-				y: 170
+				y: 160
 			},
 			size: {
 				height: height,
@@ -60,14 +60,14 @@ function Player(game,options){
 		'crouching': new Sprite({
 			position: {
 				x: 80,
-				y: 170
+				y: 160
 			},
 			size: {
 				height: 41,
 				width: spriteWidth
 			},
 			offset: {
-				y: -17
+				y: -16
 			},
 			url: 'img/sprites.png',
 			frames: [0]
@@ -88,7 +88,7 @@ function Player(game,options){
 		'walkleft' : new Sprite({
 			position: {
 				x: 0,
-				y: 108
+				y: 100
 			},
 			size: {
 				height: height,
@@ -101,7 +101,7 @@ function Player(game,options){
 		'waving' : new Sprite({
 			position: {
 				x: 0,
-				y: 233
+				y: 220
 			},
 			size: {
 				height: height,
@@ -114,8 +114,8 @@ function Player(game,options){
 		}),
 		'jumpright' : new Sprite({
 			position: {
-				x: 240,
-				y: 40
+				x: 0,
+				y: 280
 			},
 			size: {
 				height: height,
@@ -126,8 +126,8 @@ function Player(game,options){
 		}),
 		'jumpleft' : new Sprite({
 			position: {
-				x: 240,
-				y: 108
+				x: 0,
+				y: 340
 			},
 			size: {
 				height: height,

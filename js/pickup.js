@@ -40,7 +40,8 @@ Pickup.prototype.types = {
 				width: size
 			},
 			url: 'img/sprites.png',
-			frames: [0]
+			speed: 7,
+			frames: [0,1,2,3]
 		})
 
 		pickup.use = function(player){
