@@ -139,24 +139,23 @@ function Game(canvas){
 Game.prototype.tick = function(){
 	var self = this,
 		now = new Date(), 
-		stage;
+		stage, i, x;
 
 	// delta Time in fractions of a second
 	self.timeSinceLastDraw = ( now - ( self.lastDrawTime || now - 1 ) ) / 1000;
 
 	self.ctx.save();
 
-	for(var i = self.stages.length  - 1; i >= 0; i--){
+	for(i = self.stages.length  - 1; i >= 0; i--){
 		stage = self.stages[i];
 
-		stage.objects.forEach(function(object){
-			object.update && object.update(self);
-			
-		});
+		for( x = 0; x < stage.objects.length; x++ ){
+			stage.objects[x].update && stage.objects[x].update(self);
+		}
 
-		stage.objects.forEach(function(object){
-			object.checkCollisions && object.checkCollisions();
-		});
+		for( x = 0; x < stage.objects.length; x++ ){
+			stage.objects[x].checkCollisions && stage.objects[x].checkCollisions();
+		}
 
 		stage.update(self.player);
 

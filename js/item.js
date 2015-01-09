@@ -12,23 +12,28 @@ function Item(game, options){
 Item.prototype.getIntersectingObjects = function(){
 
 	var thisItem = this,
-		sides = this.theSides && this.theSides.current;
+		sides = this.theSides && this.theSides.current,
+		intersectingObjects = [],
+		i;
 
-	if(!sides){
-		return []
+	if(sides){
+		for(i = 0; i < this.stage.objects.length; i++){
+			var item = this.stage.objects[i],
+				itemSides = item.theSides && item.theSides.current;
+
+			if(itemSides
+				&& item !== thisItem
+				&& sides.right >= itemSides.left
+				&& sides.left <= itemSides.right
+				&& sides.top <= itemSides.bottom
+				&& sides.bottom >= itemSides.top
+			){
+				intersectingObjects.push(item);
+			}
+		}
 	}
 
-	return this.stage.objects.filter(function(item){
-
-		var itemSides = item.theSides && item.theSides.current;
-
-		return itemSides
-			&& item !== thisItem
-			&& sides.right >= itemSides.left
-			&& sides.left <= itemSides.right
-			&& sides.top <= itemSides.bottom
-			&& sides.bottom >= itemSides.top;
-	});
+	return intersectingObjects
 	
 };
 
