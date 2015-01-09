@@ -76,7 +76,7 @@
 	<platform x="5960" y="280" width="40" height="200"/>
 
 
-	<player x="2200" y="-400" width="40" height="40" color="pink"/>
+	<player x="40" y="420" width="40" height="40" color="pink"/>
 
 </stage>
 </svg>
