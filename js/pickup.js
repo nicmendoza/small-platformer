@@ -42,7 +42,7 @@ Pickup.prototype.types = {
 			url: 'img/player-sprites.png',
 			speed: 7,
 			frames: [0,1,2,3]
-		})
+		});
 
 		pickup.use = function(player){
 			var now = new Date(),
@@ -138,6 +138,114 @@ Pickup.prototype.types = {
 				resources.get('audio/fireball.wav').play();
 		}
 
+	},
+
+	lightning: function(pickup){
+		pickup.label = 'Lightning';
+
+		pickup.drawTransformations = function(){};
+
+
+		pickup.use = function(player){
+
+			var lightning = new Item();
+			var bolts = [lightningBoltPoints(200)];
+			lightning.game = game;
+
+			lightning.position = {
+				x: player.position.x + player.width,
+				y: player.position.y + player.height / 2
+			};
+
+			lightning.player = player;
+
+			lightning.height = lightning.player.height;
+			lightning.width = 200;
+
+			var interval = setInterval(function(){
+				bolts = [lightningBoltPoints(200)];
+			},300);
+
+			setTimeout(function(){
+				game.stages[0].removeObject(lightning);
+				clearInterval(interval);
+			},1000);
+
+
+			lightning.onUpdate = function(){
+
+				
+				// kill enemies
+				lightning.getIntersectingObjects()
+					.forEach(function(object){
+						if( object instanceof Enemy ) {
+							object.die();
+						}
+					});
+			}
+
+
+			// var intialMomentum = {
+			// 	x: player.momentum.x,
+			// 	y: player.momentum.y
+			// },
+			// 	positions = [];
+
+			lightning.draw = function(){
+				var position = game.stages[0].getRenderPosition(this.player);
+				renderLightningBolt(position.x + this.player.width, position.y + this.player.height * .2,bolts[0]);
+			};
+
+			game.stages[0].addObject(lightning);
+
+
+			
+		};
+
+		
+
+		// generate array of coordinates for bolt
+		
 	}
 
 };
+
+window.lightningBoltPoints = function(maxLength){
+	var dist = Math.round( Math.random() * maxLength),
+		points = 10 + Math.round(Math.random() * 40),
+		arr = [];
+
+	for(var i = 0; i < points; i++){
+		arr.push( {dist: Math.round( Math.random() * maxLength  ), disp: Math.round( Math.random() * 40 ) });
+	}
+
+	arr = arr.sort(function(a,b){
+		return a.dist - b.dist;
+	});
+
+
+
+	return arr;
+
+}
+window.renderLightningBolt= function(startX,startY,bolt){
+	var ctx = window.game.ctx;
+
+	ctx.strokeStyle = 'white';
+	ctx.shadowBlur = 4;
+	ctx.shadowColor = "white";
+	ctx.beginPath();
+
+	ctx.moveTo(startX,startY);
+
+	bolt.forEach(function(point){
+
+		ctx.lineTo(startX + point.dist, startY + point.disp);
+
+	});
+	
+	ctx.stroke();
+	ctx.closePath();
+};
+
+game.run = false;
