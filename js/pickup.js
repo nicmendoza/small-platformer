@@ -39,7 +39,7 @@ Pickup.prototype.types = {
 				height: size,
 				width: size
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			speed: 7,
 			frames: [0,1,2,3]
 		})
@@ -68,7 +68,7 @@ Pickup.prototype.types = {
 				fireball.game = game;
 
 				fireball.sprite = new Sprite({
-					url: 'img/sprites.png',
+					url: 'img/player-sprites.png',
 					position: {
 						x: 0,
 						y: 0

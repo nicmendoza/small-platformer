@@ -1,5 +1,5 @@
 resources.load([
-    'img/sprites.png',
+    'img/player-sprites.png',
     'audio/fireball.wav',
     'audio/coin.wav',
     'audio/jump.wav',

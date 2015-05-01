@@ -8,7 +8,7 @@ function Game(canvas){
 
 	self.height = canvas.height;
 	self.width = canvas.width;
-	this.backgroundColor = '#D7F8FC';
+	this.backgroundColor = '#97B5DF';
 
 	self.periodStart = new Date();
 	self.fps = 0;

@@ -25,7 +25,7 @@ function Particle(game,type,stage,position,options){
 				height: 20,
 				width: 20
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			speed: 10,
 			frames: [0,1]
 		});

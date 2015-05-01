@@ -54,7 +54,7 @@ function Player(game,options){
 				height: height,
 				width: spriteWidth
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			frames: [0]
 		}),
 		'crouching': new Sprite({
@@ -69,7 +69,7 @@ function Player(game,options){
 			offset: {
 				y: -16
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			frames: [0]
 		}),
 		'walkright' : new Sprite({
@@ -81,7 +81,7 @@ function Player(game,options){
 				height: height,
 				width: spriteWidth
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			speed: 4,
 			frames: [1,0,2,0]
 		}),
@@ -94,7 +94,7 @@ function Player(game,options){
 				height: height,
 				width: spriteWidth
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			speed: 4,
 			frames: [1,0,2,0]
 		}),
@@ -107,7 +107,7 @@ function Player(game,options){
 				height: height,
 				width: spriteWidth
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			speed: 5,
 			frames: [0,1,2,3,2,1],
 			once: true
@@ -121,7 +121,7 @@ function Player(game,options){
 				height: height,
 				width: spriteWidth
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			frames: [0]
 		}),
 		'flailleft' : new Sprite({
@@ -133,7 +133,7 @@ function Player(game,options){
 				height: height,
 				width: spriteWidth
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			frames: [0]
 		}),
 		'flailright' : new Sprite({
@@ -145,7 +145,7 @@ function Player(game,options){
 				height: height,
 				width: spriteWidth
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			frames: [0]
 		}),
 		'jumpleft' : new Sprite({
@@ -157,7 +157,7 @@ function Player(game,options){
 				height: height,
 				width: spriteWidth
 			},
-			url: 'img/sprites.png',
+			url: 'img/player-sprites.png',
 			frames: [0]
 		})
 
