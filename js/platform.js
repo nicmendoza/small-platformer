@@ -35,14 +35,23 @@ function Platform(game,options){
 		self.isMovingObject = true;
 		self.direction = 'forward';
 		self.path = self.game.getAllEntities().filter(function(entity){
-			return entity instanceof Line && entity.options.id === self.options.path
+			return entity instanceof Line && entity.options.id === self.options.path;
 		})[0];
 
 		self.lastOffset = {};
 
 		self.push = function(object){
 			object.position.x += self.lastOffset.x;
-			object.position.y += self.lastOffset.y;
+
+			//don't push things down (or through their own tops!)
+			// if(self.lastOffset.y > 0 ){
+			// 	debugger;
+			// 	object.position.y += Math.min( self.lastOffset.y, self.position.y - ( object.position.y + object.height ) );
+			// }
+			if(self.lastOffset.y < 0){
+				object.position.y += self.lastOffset.y;
+			}
+			
 		};
 	}
 

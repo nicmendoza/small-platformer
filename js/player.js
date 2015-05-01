@@ -161,7 +161,7 @@ function Player(game,options){
 			frames: [0]
 		})
 
-	}
+	};
 
 	self.sprite = self.states['standing'];
 
@@ -273,7 +273,7 @@ Player.prototype.updateCrouching = function(wantsToCrouch){
 		if(self.isFalling){}
 		self.position.y -= crouchDiff;
 		self.isCrouching = false;
-	};
+	}
 
 	if(wantsToCrouch && !self.isFalling && !self.isCrouching){
 		self.position.y += crouchDiff;
@@ -319,7 +319,7 @@ Player.prototype.updateSpriteState = function(){
 			self.sprite.onCompleteOnce = function(){
 				//set to standing
 				self.sprite = self.states['standing'];
-			}
+			};
 
 		// else
 		} else {
@@ -329,7 +329,7 @@ Player.prototype.updateSpriteState = function(){
 		
 	}
 
-	if(self.isFalling){
+	if(self.isFalling && (self.momentum.y > 2 || self.momentum.y < -2 ) ){
 
 		if(!self.terminalVelocity){
 

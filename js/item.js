@@ -264,14 +264,17 @@ Item.prototype.checkCollisionsY = function(intersectingItems){
 		}
 
 	} else { // if is/should be falling
-		self.momentum.y += self.game.gravity * .05;
+		self.momentum.y += self.game.gravity * 0.05;
 		// constrain to max fall speed if falling down
 		if(self.momentum.y > 0 && self.momentum.y >= self.game.maxFallSpeed * 0.85){
 			self.momentum.y = Math.min(self.momentum.y, self.game.maxFallSpeed);
 			self.terminalVelocity = true;
 		}
 		// comment out to fly :)
-		self.isFalling = true;
+		if(!self.canFly){
+			self.isFalling = true;
+		}
+		
 	}
 
 };
