@@ -7,8 +7,8 @@ function Enemy(game,options){
 		y: options.y
 	};
 	self.game = game;
-	self.width = 20;
-	self.height = 20;
+	self.width = 40;
+	self.height = 40;
 
 	self.options = options;
 
@@ -23,6 +23,8 @@ function Enemy(game,options){
 	};
 
 	self.lastPosition = {};
+
+	self.states = {};
 
 	self.direction = 'right';
 
@@ -48,9 +50,13 @@ Enemy.prototype.die = function(){
 
 	if(this.isDead) return;
 	this.isDead = true;
-	this.height = 2;
-	this.position.y += 8;
-	this.momentum.x = 0;
+
+	if(this.states.dead){
+		this.sprite = this.states.dead;
+	}
+	// this.height = 2;
+	// this.position.y += 8;
+	// this.momentum.x = 0;
 	// hack to strop patrol updates
 	delete this.onUpdate;
 	return true;
@@ -59,6 +65,35 @@ Enemy.prototype.die = function(){
 Enemy.prototype.types = {
 
 	jumping_jack: function(entity){
+
+		entity.states['standing'] = new Sprite({
+			position: {
+				x: 0,
+				y: 0
+			},
+			size: {
+				height: 40,
+				width: 40
+			},
+			url: 'img/enemy-sprites.png',
+			frames: [0]
+		});
+
+		entity.states['dead'] = new Sprite({
+			position: {
+				x: 40,
+				y: 0
+			},
+			size: {
+				height: 40,
+				width: 40
+			},
+			url: 'img/enemy-sprites.png',
+			frames: [0]
+		});
+
+		entity.sprite = entity.states['standing'];
+
 		entity.onUpdate = function(game){
 			if(!this.isFalling && Math.random() * 100 > 95 ){
 				this.momentum.y = -4
@@ -68,6 +103,35 @@ Enemy.prototype.types = {
 		}
 	},
 	patrolling: function(entity){
+
+
+		entity.states['standing'] = new Sprite({
+			position: {
+				x: 0,
+				y: 0
+			},
+			size: {
+				height: 40,
+				width: 40
+			},
+			url: 'img/enemy-sprites.png',
+			frames: [0]
+		});
+
+		entity.states['dead'] = new Sprite({
+			position: {
+				x: 40,
+				y: 0
+			},
+			size: {
+				height: 40,
+				width: 40
+			},
+			url: 'img/enemy-sprites.png',
+			frames: [0]
+		});
+
+		entity.sprite = entity.states['standing'];
 
 		entity.onInit = function(game){
 			// this is optional
